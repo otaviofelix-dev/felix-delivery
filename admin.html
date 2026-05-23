@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Painel Restaurante</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+
+  background:#0f0f0f;
+
+  color:white;
+
+  font-family:Arial,sans-serif;
+
+  min-height:100vh;
+
+}
+
+/* LOGIN */
+
+.login{
+
+  width:100%;
+
+  min-height:100vh;
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+}
+
+.box{
+
+  width:100%;
+
+  max-width:400px;
+
+  background:#1b1b1b;
+
+  padding:30px;
+
+  border-radius:24px;
+
+  box-shadow:
+  0 10px 30px rgba(0,0,0,0.4);
+
+}
+
+h1{
+
+  margin-bottom:25px;
+
+  text-align:center;
+
+}
+
+input{
+
+  width:100%;
+
+  padding:16px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:#2a2a2a;
+
+  color:white;
+
+  margin-bottom:15px;
+
+  font-size:16px;
+
+}
+
+button{
+
+  width:100%;
+
+  border:none;
+
+  background:#00c853;
+
+  color:white;
+
+  padding:16px;
+
+  border-radius:14px;
+
+  font-size:16px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+}
+
+/* PAINEL */
+
+#painel{
+
+  display:none;
+
+  padding:20px;
+
+}
+
+.topo{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  margin-bottom:25px;
+
+}
+
+.sair{
+
+  width:auto;
+
+  padding:12px 18px;
+
+  background:#c62828;
+
+}
+
+/* PEDIDOS */
+
+#pedidos{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:20px;
+
+}
+
+.card{
+
+  background:#1b1b1b;
+
+  border-radius:22px;
+
+  padding:20px;
+
+  box-shadow:
+  0 8px 20px rgba(0,0,0,0.3);
+
+}
+
+.id{
+
+  color:#00e676;
+
+  font-size:20px;
+
+  font-weight:bold;
+
+}
+
+.info{
+
+  margin-top:12px;
+
+  line-height:1.7;
+
+  color:#ddd;
+
+}
+
+.status{
+
+  margin-top:16px;
+
+  padding:12px;
+
+  border:none;
+
+  border-radius:12px;
+
+  background:#2a2a2a;
+
+  color:white;
+
+  width:100%;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- LOGIN -->
+
+<div class="login" id="login">
+
+  <div class="box">
+
+    <h1>
+      🍔 Restaurante
+    </h1>
+
+    <input
+      type="text"
+      id="usuario"
+      placeholder="Usuário"
+    >
+
+    <input
+      type="password"
+      id="senha"
+      placeholder="Senha"
+    >
+
+    <button onclick="entrar()">
+      Entrar
+    </button>
+
+  </div>
+
+</div>
+
+<!-- PAINEL -->
+
+<div id="painel">
+
+  <div class="topo">
+
+    <h1>
+      📦 Pedidos
+    </h1>
+
+    <button
+      class="sair"
+      onclick="logout()"
+    >
+
+      Sair
+
+    </button>
+
+  </div>
+
+  <div id="pedidos">
+
+    Carregando...
+
+  </div>
+
+</div>
+
+<script>
+
+const API =
+"https://script.google.com/macros/s/AKfycbzddorYjnnAXuwEvOUKDb2h6jfsdDF-0EpfcohoZdYMN42Fz6CaxDA4kPcBXBuNKOBLkw/exec";
+
+/* LOGIN */
+
+function entrar(){
+
+  const usuario =
+  document.getElementById("usuario").value;
+
+  const senha =
+  document.getElementById("senha").value;
+
+  if(
+
+    usuario === "admin"
+
+    &&
+
+    senha === "123"
+
+  ){
+
+    localStorage.setItem(
+      "adminLogado",
+      "sim"
+    );
+
+    mostrarPainel();
+
+  }else{
+
+    alert("Login inválido");
+
+  }
+
+}
+
+/* MOSTRAR */
+
+function mostrarPainel(){
+
+  document.getElementById("login")
+  .style.display = "none";
+
+  document.getElementById("painel")
+  .style.display = "block";
+
+  carregarPedidos();
+
+}
+
+/* LOGOUT */
+
+function logout(){
+
+  localStorage.removeItem(
+    "adminLogado"
+  );
+
+  location.reload();
+
+}
+
+/* CARREGAR PEDIDOS */
+
+async function carregarPedidos(){
+
+  try{
+
+    const resposta =
+    await fetch(API + "?pedidos=1");
+
+    const pedidos =
+    await resposta.json();
+
+    let html = "";
+
+    pedidos.reverse();
+
+    pedidos.forEach(p => {
+
+      html += `
+
+      <div class="card">
+
+        <div class="id">
+
+          Pedido #${p.idPedido}
+
+        </div>
+
+        <div class="info">
+
+          👤 ${p.cliente}
+          <br>
+
+          📞 ${p.telefone}
+          <br>
+
+          📍 ${p.endereco}
+          <br>
+
+          🏠 ${p.referencia}
+          <br>
+
+          💳 ${p.pagamento}
+          <br><br>
+
+          🍔 ${p.itens}
+          <br><br>
+
+          💰 R$ ${p.total}
+
+        </div>
+
+        <select class="status">
+
+          <option>
+
+            ${p.status}
+
+          </option>
+
+          <option>
+            Pendente
+          </option>
+
+          <option>
+            Em preparo
+          </option>
+
+          <option>
+            Saiu para entrega
+          </option>
+
+          <option>
+            Entregue
+          </option>
+
+        </select>
+
+      </div>
+
+      `;
+
+    });
+
+    document.getElementById("pedidos")
+    .innerHTML = html;
+
+  }catch(erro){
+
+    console.log(erro);
+
+  }
+
+}
+
+/* LOGIN AUTO */
+
+if(
+
+  localStorage.getItem("adminLogado")
+
+){
+
+  mostrarPainel();
+
+}
+
+setInterval(
+
+  carregarPedidos,
+
+  5000
+
+);
+
+</script>
+
+</body>
+
+</html>
