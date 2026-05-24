@@ -540,31 +540,41 @@ async function carregarProdutos(){
 
 async function novoProduto(){
 
-  await fetch(API,{
+  try{
 
-    method:"POST",
+    const resposta =
+    await fetch(API,{
 
-    body:JSON.stringify({
+      method:"POST",
 
-      acao:"novoProduto"
+      headers:{
+        "Content-Type":"application/json"
+      },
 
-    })
+      body:JSON.stringify({
 
-  });
+        acao:"novoProduto"
 
-  carregarProdutos();
+      })
 
-}
+    });
 
-/* PREVIEW */
+    const texto =
+    await resposta.text();
 
-function previewImagem(i){
+    console.log(texto);
 
-  const url =
-  document.getElementById("imagem"+i).value;
+    alert("Produto criado!");
 
-  document.getElementById("preview"+i)
-  .src = url;
+    carregarProdutos();
+
+  }catch(erro){
+
+    alert("Erro ao adicionar produto");
+
+    console.log(erro);
+
+  }
 
 }
 
