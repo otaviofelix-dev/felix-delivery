@@ -18,193 +18,151 @@
 }
 
 body{
-
   background:#0f0f0f;
-
   color:white;
-
   font-family:Arial,sans-serif;
-
   min-height:100vh;
-
 }
 
 /* LOGIN */
 
 .login{
-
   width:100%;
-
   min-height:100vh;
-
   display:flex;
-
   justify-content:center;
-
   align-items:center;
-
 }
 
 .box{
-
   width:100%;
-
   max-width:400px;
-
   background:#1b1b1b;
-
   padding:30px;
-
   border-radius:24px;
-
-  box-shadow:
-  0 10px 30px rgba(0,0,0,0.4);
-
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
 }
 
 h1{
-
   margin-bottom:25px;
-
   text-align:center;
-
 }
 
 input{
-
   width:100%;
-
   padding:16px;
-
   border:none;
-
   border-radius:14px;
-
   background:#2a2a2a;
-
   color:white;
-
   margin-bottom:15px;
-
   font-size:16px;
-
 }
 
 button{
-
   width:100%;
-
   border:none;
-
   background:#00c853;
-
   color:white;
-
   padding:16px;
-
   border-radius:14px;
-
   font-size:16px;
-
   font-weight:bold;
-
   cursor:pointer;
+  transition:0.2s;
+}
 
+button:hover{
+  opacity:0.9;
 }
 
 /* PAINEL */
 
 #painel{
-
   display:none;
-
   padding:20px;
+}
 
+#produtos{
+  display:none;
+  padding:20px;
 }
 
 .topo{
-
   display:flex;
-
   justify-content:space-between;
-
   align-items:center;
-
   margin-bottom:25px;
-
 }
 
 .sair{
-
   width:auto;
-
   padding:12px 18px;
-
   background:#c62828;
+}
 
+/* ABAS */
+
+.abas{
+  display:flex;
+  gap:10px;
+  margin-bottom:25px;
+}
+
+.abas button{
+  width:auto;
+  padding:12px 20px;
 }
 
 /* PEDIDOS */
 
 #pedidos{
-
   display:flex;
-
   flex-direction:column;
-
   gap:20px;
-
 }
 
 .card{
-
   background:#1b1b1b;
-
   border-radius:22px;
-
   padding:20px;
-
-  box-shadow:
-  0 8px 20px rgba(0,0,0,0.3);
-
+  box-shadow:0 8px 20px rgba(0,0,0,0.3);
 }
 
 .id{
-
   color:#00e676;
-
   font-size:20px;
-
   font-weight:bold;
-
 }
 
 .info{
-
   margin-top:12px;
-
   line-height:1.7;
-
   color:#ddd;
-
 }
 
 .status{
-
   margin-top:16px;
-
   padding:12px;
-
   border:none;
-
   border-radius:12px;
-
   background:#2a2a2a;
-
   color:white;
-
   width:100%;
+}
 
+.produtoInput{
+  margin-bottom:12px;
+}
+
+.preview{
+  width:100%;
+  max-height:220px;
+  object-fit:cover;
+  border-radius:14px;
+  margin-top:10px;
+  margin-bottom:15px;
+  background:#222;
 }
 
 </style>
@@ -250,21 +208,53 @@ button{
   <div class="topo">
 
     <h1>
-      📦 Pedidos
+      📦 Painel Restaurante
     </h1>
 
     <button
       class="sair"
       onclick="logout()"
     >
-
       Sair
-
     </button>
 
   </div>
 
+  <!-- ABAS -->
+
+  <div class="abas">
+
+    <button onclick="abrirPedidos()">
+      📦 Pedidos
+    </button>
+
+    <button onclick="abrirProdutos()">
+      🍔 Produtos
+    </button>
+
+  </div>
+
+  <!-- PEDIDOS -->
+
   <div id="pedidos">
+
+    Carregando...
+
+  </div>
+
+</div>
+
+<!-- PRODUTOS -->
+
+<div id="produtos">
+
+  <h1>
+    🍔 Produtos
+  </h1>
+
+  <br>
+
+  <div id="listaProdutos">
 
     Carregando...
 
@@ -288,13 +278,9 @@ function entrar(){
   document.getElementById("senha").value;
 
   if(
-
     usuario === "admin"
-
     &&
-
     senha === "123"
-
   ){
 
     localStorage.setItem(
@@ -312,7 +298,7 @@ function entrar(){
 
 }
 
-/* MOSTRAR */
+/* MOSTRAR PAINEL */
 
 function mostrarPainel(){
 
@@ -338,7 +324,31 @@ function logout(){
 
 }
 
-/* CARREGAR PEDIDOS */
+/* ABAS */
+
+function abrirPedidos(){
+
+  document.getElementById("painel")
+  .style.display = "block";
+
+  document.getElementById("produtos")
+  .style.display = "none";
+
+}
+
+function abrirProdutos(){
+
+  document.getElementById("painel")
+  .style.display = "none";
+
+  document.getElementById("produtos")
+  .style.display = "block";
+
+  carregarProdutos();
+
+}
+
+/* PEDIDOS */
 
 async function carregarPedidos(){
 
@@ -393,9 +403,7 @@ async function carregarPedidos(){
         <select class="status">
 
           <option>
-
             ${p.status}
-
           </option>
 
           <option>
@@ -433,24 +441,150 @@ async function carregarPedidos(){
 
 }
 
-/* LOGIN AUTO */
+/* PRODUTOS */
 
-if(
+async function carregarProdutos(){
 
-  localStorage.getItem("adminLogado")
+  try{
 
-){
+    const resposta =
+    await fetch(API + "?produtos=1");
 
-  mostrarPainel();
+    const produtos =
+    await resposta.json();
+
+    let html = "";
+
+    produtos.forEach((p,i)=>{
+
+      html += `
+
+      <div class="card">
+
+        <input
+          class="produtoInput"
+          id="nome${i}"
+          value="${p.nome}"
+          placeholder="Nome"
+        >
+
+        <input
+          class="produtoInput"
+          id="preco${i}"
+          value="${p.preco}"
+          placeholder="Preço"
+        >
+
+        <input
+          class="produtoInput"
+          id="categoria${i}"
+          value="${p.categoria}"
+          placeholder="Categoria"
+        >
+
+        <input
+          class="produtoInput"
+          id="imagem${i}"
+          value="${p.imagem}"
+          placeholder="URL da imagem"
+          oninput="previewImagem(${i})"
+        >
+
+        <img
+          id="preview${i}"
+          class="preview"
+          src="${p.imagem}"
+        >
+
+        <button onclick="salvarProduto(${i})">
+
+          💾 Salvar Produto
+
+        </button>
+
+      </div>
+
+      <br>
+
+      `;
+
+    });
+
+    document.getElementById("listaProdutos")
+    .innerHTML = html;
+
+  }catch(erro){
+
+    console.log(erro);
+
+  }
 
 }
 
+/* PREVIEW */
+
+function previewImagem(i){
+
+  const url =
+  document.getElementById("imagem"+i).value;
+
+  document.getElementById("preview"+i)
+  .src = url;
+
+}
+
+/* SALVAR */
+
+async function salvarProduto(i){
+
+  const nome =
+  document.getElementById("nome"+i).value;
+
+  const preco =
+  document.getElementById("preco"+i).value;
+
+  const categoria =
+  document.getElementById("categoria"+i).value;
+
+  const imagem =
+  document.getElementById("imagem"+i).value;
+
+  await fetch(API,{
+
+    method:"POST",
+
+    body:JSON.stringify({
+
+      acao:"salvarProduto",
+
+      index:i,
+
+      nome,
+      preco,
+      categoria,
+      imagem
+
+    })
+
+  });
+
+  alert("Produto salvo!");
+
+}
+
+/* LOGIN AUTO */
+
+if(
+  localStorage.getItem("adminLogado")
+){
+  mostrarPainel();
+}
+
+/* AUTO ATUALIZAR */
+
 setInterval(
-
   carregarPedidos,
-
   5000
-
 );
 
 </script>
