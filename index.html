@@ -254,6 +254,14 @@ button:hover{
 
   <br>
 
+  <button onclick="novoProduto()">
+
+    ➕ Adicionar Produto
+
+  </button>
+
+  <br><br>
+
   <div id="listaProdutos">
 
     Carregando...
@@ -265,7 +273,7 @@ button:hover{
 <script>
 
 const API =
-"https://script.google.com/macros/s/AKfycbzddorYjnnAXuwEvOUKDb2h6jfsdDF-0EpfcohoZdYMN42Fz6CaxDA4kPcBXBuNKOBLkw/exec";
+"https://script.google.com/macros/s/AKfycbwYec4nNNscraZl1PlaeQ0DDyqNPdjvZYPGYncWPLCVH5V51hGBXJGrXX1BLak4WgJMKA/exec";
 
 /* LOGIN */
 
@@ -470,16 +478,23 @@ async function carregarProdutos(){
 
         <input
           class="produtoInput"
-          id="preco${i}"
-          value="${p.preco}"
-          placeholder="Preço"
+          id="categoria${i}"
+          value="${p.categoria}"
+          placeholder="Categoria"
         >
 
         <input
           class="produtoInput"
-          id="categoria${i}"
-          value="${p.categoria}"
-          placeholder="Categoria"
+          id="descricao${i}"
+          value="${p.descricao}"
+          placeholder="Descrição"
+        >
+
+        <input
+          class="produtoInput"
+          id="preco${i}"
+          value="${p.preco}"
+          placeholder="Preço"
         >
 
         <input
@@ -521,6 +536,26 @@ async function carregarProdutos(){
 
 }
 
+/* NOVO PRODUTO */
+
+async function novoProduto(){
+
+  await fetch(API,{
+
+    method:"POST",
+
+    body:JSON.stringify({
+
+      acao:"novoProduto"
+
+    })
+
+  });
+
+  carregarProdutos();
+
+}
+
 /* PREVIEW */
 
 function previewImagem(i){
@@ -540,11 +575,14 @@ async function salvarProduto(i){
   const nome =
   document.getElementById("nome"+i).value;
 
-  const preco =
-  document.getElementById("preco"+i).value;
-
   const categoria =
   document.getElementById("categoria"+i).value;
+
+  const descricao =
+  document.getElementById("descricao"+i).value;
+
+  const preco =
+  document.getElementById("preco"+i).value;
 
   const imagem =
   document.getElementById("imagem"+i).value;
@@ -560,8 +598,9 @@ async function salvarProduto(i){
       index:i,
 
       nome,
-      preco,
       categoria,
+      descricao,
+      preco,
       imagem
 
     })
