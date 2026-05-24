@@ -273,7 +273,7 @@ button:hover{
 <script>
 
 const API =
-"https://script.google.com/macros/s/AKfycbwYec4nNNscraZl1PlaeQ0DDyqNPdjvZYPGYncWPLCVH5V51hGBXJGrXX1BLak4WgJMKA/exec";
+"https://script.google.com/macros/s/AKfycbzyDs1vg2u6vnrJn4W_mHqzzKkOkwenLQm3QIQ26b7ZR0L1g018KGdEiS97HQc1q9Durg/exec";
 
 /* LOGIN */
 
@@ -513,9 +513,20 @@ async function carregarProdutos(){
 
         <button onclick="salvarProduto(${i})">
 
-          💾 Salvar Produto
+  💾 Salvar Produto
 
-        </button>
+</button>
+
+<br><br>
+
+<button
+  onclick="apagarProduto(${i})"
+  style="background:#c62828;"
+>
+
+  🗑️ Apagar Produto
+
+</button>
 
       </div>
 
@@ -618,6 +629,39 @@ async function salvarProduto(i){
   });
 
   alert("Produto salvo!");
+
+}
+
+async function apagarProduto(i){
+
+  const confirmar =
+  confirm("Deseja apagar este produto?");
+
+  if(!confirmar){
+    return;
+  }
+
+  await fetch(API,{
+
+    method:"POST",
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
+    body:JSON.stringify({
+
+      acao:"apagarProduto",
+
+      index:i
+
+    })
+
+  });
+
+  alert("Produto apagado!");
+
+  carregarProdutos();
 
 }
 
