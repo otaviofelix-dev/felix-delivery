@@ -14,11 +14,7 @@
       --red: #ff3b5c;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
@@ -28,10 +24,7 @@
       padding: 20px;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: auto;
-    }
+    .container { max-width: 1200px; margin: auto; }
 
     h2 {
       color: white;
@@ -39,7 +32,6 @@
       font-weight: 600;
     }
 
-    /* Cards Modernos */
     .card {
       background: var(--card);
       border-radius: 16px;
@@ -55,7 +47,6 @@
       box-shadow: 0 10px 25px rgba(0, 212, 255, 0.1);
     }
 
-    /* Inputs */
     input, select {
       background: #25252e;
       border: 1px solid #3a3a45;
@@ -65,7 +56,6 @@
       width: 100%;
       margin: 8px 0;
       font-size: 15px;
-      transition: 0.3s;
     }
 
     input:focus, select:focus {
@@ -74,7 +64,6 @@
       box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
     }
 
-    /* Botões */
     button {
       padding: 12px 20px;
       border: none;
@@ -85,28 +74,12 @@
       margin: 5px 5px 5px 0;
     }
 
-    button:hover {
-      transform: translateY(-2px);
-    }
+    button:hover { transform: translateY(-2px); }
 
-    /* Botão Principal */
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
-      font-weight: bold;
-    }
+    .btn-primary { background: var(--accent); color: #000; font-weight: bold; }
+    .btn-primary:hover { background: #00ffcc; }
+    .btn-danger { background: var(--red); color: white; }
 
-    .btn-primary:hover {
-      background: #00ffcc;
-    }
-
-    /* Botão Vermelho */
-    .btn-danger {
-      background: var(--red);
-      color: white;
-    }
-
-    /* Preview */
     .preview {
       max-width: 180px;
       max-height: 180px;
@@ -115,7 +88,6 @@
       border: 2px solid #2a2a32;
     }
 
-    /* Login */
     #login {
       max-width: 380px;
       margin: 80px auto;
@@ -124,11 +96,6 @@
       border-radius: 20px;
       text-align: center;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    #login h2 {
-      margin-bottom: 25px;
-      color: var(--accent);
     }
   </style>
 </head>
@@ -165,6 +132,22 @@
 
 <script>
 const API = "https://script.google.com/macros/s/AKfycbyXs2d5dDCVGVsiAikISB7fjnkF37iD6---OYh1sPgrRTRtpdtMSJnIJmBBLDRN0NyPhw/exec";
+
+// Função auxiliar para requisições (melhor compatibilidade)
+async function fazerRequisicao(dados) {
+  try {
+    await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dados),
+      mode: "no-cors"
+    });
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
 
 // ==================== LOGIN ====================
 function entrar() {
@@ -237,20 +220,12 @@ async function carregarPedidos() {
 
   } catch (e) {
     console.error(e);
-    document.getElementById("pedidos").innerHTML = "<p style='color:red; text-align:center;'>Erro ao carregar pedidos.</p>";
+    document.getElementById("pedidos").innerHTML = "<p style='color:#ff3b5c; text-align:center;'>Erro ao carregar pedidos.</p>";
   }
 }
 
 async function atualizarStatus(idPedido, status) {
-  try {
-    await fetch(API, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ acao: "atualizarStatus", idPedido, status })
-    });
-  } catch (e) {
-    console.error(e);
-  }
+  fazerRequisicao({ acao: "atualizarStatus", idPedido, status });
 }
 
 // ==================== PRODUTOS ====================
@@ -276,25 +251,28 @@ async function carregarProdutos() {
       </div>`;
     });
 
-    document.getElementById("listaProdutos").innerHTML = html || "<p style='text-align:center; padding:30px;'>Nenhum produto cadastrado.</p>";
+    document.getElementById("listaProdutos").innerHTML = html || "<p style='text-align:center; padding:40px; color:#888;'>Nenhum produto cadastrado ainda.</p>";
 
   } catch (e) {
     console.error(e);
+    document.getElementById("listaProdutos").innerHTML = `<p style='color:#ff3b5c; text-align:center;'>Erro ao carregar produtos.</p>`;
   }
 }
 
 async function novoProduto() {
   if (!confirm("Criar novo produto?")) return;
+
   try {
-    await fetch(API, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ acao: "novoProduto" })
-    });
-    alert("✅ Produto criado com sucesso!");
-    carregarProdutos();
+    const sucesso = await fazerRequisicao({ acao: "novoProduto" });
+    if (sucesso) {
+      alert("✅ Produto criado com sucesso!");
+      carregarProdutos();
+    } else {
+      alert("Produto criado (pode demorar alguns segundos para aparecer).");
+      carregarProdutos();
+    }
   } catch (e) {
-    alert("Erro ao criar produto");
+    alert("Erro ao criar produto. Tente usar o Live Server do VS Code.");
   }
 }
 
@@ -305,41 +283,33 @@ function previewImagem(i) {
 
 async function salvarProduto(i) {
   try {
-    await fetch(API, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        acao: "salvarProduto",
-        index: i,
-        nome: document.getElementById("nome" + i).value,
-        categoria: document.getElementById("categoria" + i).value,
-        descricao: document.getElementById("descricao" + i).value,
-        preco: document.getElementById("preco" + i).value,
-        imagem: document.getElementById("imagem" + i).value
-      })
+    await fazerRequisicao({
+      acao: "salvarProduto",
+      index: i,
+      nome: document.getElementById("nome" + i).value,
+      categoria: document.getElementById("categoria" + i).value,
+      descricao: document.getElementById("descricao" + i).value,
+      preco: document.getElementById("preco" + i).value,
+      imagem: document.getElementById("imagem" + i).value
     });
     alert("✅ Produto salvo!");
   } catch (e) {
-    alert("Erro ao salvar");
+    alert("Erro ao salvar produto");
   }
 }
 
 async function apagarProduto(i) {
   if (!confirm("Apagar este produto permanentemente?")) return;
   try {
-    await fetch(API, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ acao: "apagarProduto", index: i })
-    });
+    await fazerRequisicao({ acao: "apagarProduto", index: i });
     alert("🗑️ Produto apagado!");
     carregarProdutos();
   } catch (e) {
-    alert("Erro ao apagar");
+    alert("Erro ao apagar produto");
   }
 }
 
-// ==================== INIT ====================
+// ==================== INICIALIZAÇÃO ====================
 if (localStorage.getItem("adminLogado")) {
   mostrarPainel();
 }
