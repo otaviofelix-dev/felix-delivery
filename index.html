@@ -50,6 +50,34 @@
     .btn-primary { background: var(--accent); color: #000; }
     .btn-danger { background: var(--red); color: white; }
     .btn-back { background: #333; color: white; }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #1f1f28;
+      padding: 25px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 420px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      background: #2a2a32;
+      border: none;
+      border-radius: 8px;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -77,13 +105,12 @@
       <button class="btn-primary" onclick="abrirCancelados()">❌ Pedidos Cancelados</button>
       <button class="btn-primary" onclick="abrirProdutos()">📦 Gerenciar Produtos</button>
     </div>
-
-    <div class="summary" style="display:flex; gap:20px; flex-wrap:wrap;">
-      <div class="summary-card" style="flex:1; background:var(--card); padding:20px; border-radius:12px; text-align:center;">
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+      <div class="card" style="flex:1; text-align:center;">
         <h3>Total de Pedidos</h3>
         <h1 id="total-pedidos" style="color:var(--accent); font-size:42px;">0</h1>
       </div>
-      <div class="summary-card" style="flex:1; background:var(--card); padding:20px; border-radius:12px; text-align:center;">
+      <div class="card" style="flex:1; text-align:center;">
         <h3>Valor Total</h3>
         <h1 id="valor-total" style="color:var(--green); font-size:42px;">R$ 0,00</h1>
       </div>
@@ -104,7 +131,7 @@
     <div id="cancelados"></div>
   </div>
 
-  <!-- PRODUTOS -->
+  <!-- GERENCIAR PRODUTOS -->
   <div id="produtos-section" style="display:none;">
     <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
     <h2>📦 Gerenciar Produtos</h2>
@@ -113,26 +140,53 @@
   </div>
 </div>
 
-<script>
-const API = "https://script.google.com/macros/s/AKfycbyXs2d5dDCVGVsiAikISB7fjnkF37iD6---OYh1sPgrRTRtpdtMSJnIJmBBLDRN0NyPhw/exec";
+<!-- MODAL PARA PRODUTOS -->
+<div id="modalProduto" class="modal">
+  <div class="modal-content">
+    <h3 id="modalTitulo">Novo Produto</h3>
+    
+    <input type="text" id="prodNome" placeholder="Nome do produto" required>
+    <input type="number" id="prodPreco" placeholder="Preço (ex: 29.90)" step="0.01" required>
+    <input type="text" id="prodCategoria" placeholder="Categoria (ex: Lanches, Bebidas)">
+    <input type="text" id="prodImagem" placeholder="URL da Imagem">
 
+    <div style="margin-top:20px; display:flex; gap:10px;">
+      <button class="btn-primary" onclick="salvarModal()" style="flex:1;">Salvar</button>
+      <button class="btn-back" onclick="fecharModal()" style="flex:1;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbz4X89MZ60TUVIKERHk8BZ6Hzh-8MuN8uNl8KFU1CqeYDXnLa050oHc1Lhjr2asj_uxaQ/exec";
+
+let produtoEditando = null;
+
+// ==================== REQUISIÇÃO ====================
 async function fazerRequisicao(dados) {
   try {
-    await fetch(API, {
+    const response = await fetch(API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados)
     });
-    return true;
-  } catch (e) { return false; }
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return { success: false };
+  }
 }
 
-// ==================== NAVEGAÇÃO ====================
+// ==================== LOGIN ====================
 function entrar() {
-  if (document.getElementById("usuario").value === "admin" && document.getElementById("senha").value === "123") {
+  const usuario = document.getElementById("usuario").value;
+  const senha = document.getElementById("senha").value;
+  if (usuario === "admin" && senha === "123") {
     localStorage.setItem("adminLogado", "sim");
     mostrarPainel();
-  } else alert("Login inválido!");
+  } else {
+    alert("Login inválido!");
+  }
 }
 
 function mostrarPainel() {
@@ -141,12 +195,16 @@ function mostrarPainel() {
   carregarDashboard();
 }
 
-function logout() { localStorage.removeItem("adminLogado"); location.reload(); }
+function logout() {
+  localStorage.removeItem("adminLogado");
+  location.reload();
+}
+
 function voltarParaMenu() {
+  document.getElementById("painel").style.display = "block";
   document.getElementById("pedidos-section").style.display = "none";
   document.getElementById("cancelados-section").style.display = "none";
   document.getElementById("produtos-section").style.display = "none";
-  document.getElementById("painel").style.display = "block";
 }
 
 function abrirPedidos() {
@@ -162,7 +220,9 @@ function abrirCancelados() {
 }
 
 function abrirProdutos() {
-  alert("Em desenvolvimento...");
+  document.getElementById("painel").style.display = "none";
+  document.getElementById("produtos-section").style.display = "block";
+  carregarProdutos();
 }
 
 // ==================== DASHBOARD ====================
@@ -174,7 +234,7 @@ async function carregarDashboard() {
     const valor = pedidos.reduce((s, p) => s + parseFloat(p.total || 0), 0);
     document.getElementById("total-pedidos").textContent = total;
     document.getElementById("valor-total").textContent = "R$ " + valor.toFixed(2);
-  } catch(e){}
+  } catch (e) { console.log(e); }
 }
 
 // ==================== PEDIDOS ====================
@@ -183,28 +243,23 @@ async function carregarPedidos() {
     const res = await fetch(API + "?pedidos=1");
     const pedidos = await res.json();
     let html = "";
-    pedidos.reverse();
 
-    pedidos.forEach(p => {
+    pedidos.reverse().forEach(p => {
       html += `
-      <div class="card">
-        <strong style="color:var(--accent)">Pedido #${p.idPedido}</strong><br><br>
-        👤 ${p.cliente} | 📞 ${p.telefone}<br>
-        📍 ${p.endereco}<br><br>
-        🍔 ${p.itens}<br><br>
-        💰 <strong style="color:var(--green)">R$ ${parseFloat(p.total).toFixed(2)}</strong><br><br>
-        
-        <select onchange="atualizarStatus(${p.idPedido}, this.value)">
-          <option value="Pendente" ${p.status === "Pendente" ? "selected" : ""}>Pendente</option>
-          <option value="Em preparo" ${p.status === "Em preparo" ? "selected" : ""}>Em preparo</option>
-          <option value="Saiu para entrega" ${p.status === "Saiu para entrega" ? "selected" : ""}>Saiu para entrega</option>
-          <option value="Entregue" ${p.status === "Entregue" ? "selected" : ""}>Entregue</option>
-        </select>
-        <button class="btn-danger" onclick="cancelarPedido(${p.idPedido}, '${p.telefone}', '${p.cliente}')">❌ Cancelar Pedido</button>
-      </div>`;
+        <div class="card">
+          <strong style="color:var(--accent)">Pedido #${p.idPedido}</strong><br><br>
+          👤 ${p.cliente} | 📞 ${p.telefone}<br>
+          📍 ${p.endereco}<br><br>
+          🍔 ${p.itens}<br><br>
+          💰 <strong style="color:var(--green)">R$ ${parseFloat(p.total||0).toFixed(2)}</strong><br><br>
+          Status: <b>${p.status}</b>
+        </div>`;
     });
-    document.getElementById("pedidos").innerHTML = html || "<p>Nenhum pedido ativo.</p>";
-  } catch (e) {}
+
+    document.getElementById("pedidos").innerHTML = html || "<p>Nenhum pedido encontrado.</p>";
+  } catch (e) {
+    document.getElementById("pedidos").innerHTML = "<p>Erro ao carregar pedidos.</p>";
+  }
 }
 
 // ==================== CANCELADOS ====================
@@ -212,46 +267,121 @@ async function carregarCancelados() {
   try {
     const res = await fetch(API + "?pedidos=1");
     const pedidos = await res.json();
-    let html = "";
     const cancelados = pedidos.filter(p => p.status === "Cancelado");
+    let html = "";
 
     cancelados.forEach(p => {
       html += `
-      <div class="card" style="border-left: 5px solid var(--red); opacity:0.9;">
-        <strong style="color:var(--red)">Pedido #${p.idPedido} (Cancelado)</strong><br><br>
-        👤 ${p.cliente}<br>
-        📞 ${p.telefone}<br><br>
-        💰 R$ ${parseFloat(p.total).toFixed(2)}
-      </div>`;
+        <div class="card" style="border-left: 5px solid var(--red);">
+          <strong style="color:var(--red)">Pedido #${p.idPedido} (Cancelado)</strong><br><br>
+          👤 ${p.cliente}<br>
+          📞 ${p.telefone}<br><br>
+          💰 R$ ${parseFloat(p.total||0).toFixed(2)}
+        </div>`;
     });
 
     document.getElementById("cancelados").innerHTML = html || "<p>Nenhum pedido cancelado.</p>";
-  } catch (e) {}
+  } catch (e) {
+    document.getElementById("cancelados").innerHTML = "<p>Erro ao carregar.</p>";
+  }
 }
 
-// ==================== FUNÇÕES GERAIS ====================
-async function atualizarStatus(idPedido, status) {
-  await fazerRequisicao({ acao: "atualizarStatus", idPedido, status });
-  setTimeout(() => { carregarPedidos(); carregarCancelados(); }, 800);
+// ==================== PRODUTOS ====================
+async function carregarProdutos() {
+  try {
+    const res = await fetch(API + "?produtos=1");
+    const produtos = await res.json();
+
+    let html = `<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;">`;
+
+    produtos.forEach(p => {
+      html += `
+        <div class="card" style="text-align:center;">
+          <img src="${p.imagem || 'https://placehold.co/600x400'}" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
+          <h3 style="margin:12px 0 8px;">${p.nome}</h3>
+          <h2 style="color:var(--green);">R$ ${parseFloat(p.preco).toFixed(2)}</h2>
+          <p>${p.categoria || ""}</p>
+          <div style="margin-top:12px;">
+            <button class="btn-primary" onclick="editarProduto('${p.id}')">✏️ Editar</button>
+            <button class="btn-danger" onclick="excluirProduto('${p.id}')">🗑 Excluir</button>
+          </div>
+        </div>`;
+    });
+
+    html += `</div>`;
+    document.getElementById("listaProdutos").innerHTML = html || "<p>Nenhum produto cadastrado.</p>";
+  } catch (e) {
+    document.getElementById("listaProdutos").innerHTML = "<p>Erro ao carregar produtos.</p>";
+  }
 }
 
-async function cancelarPedido(id, telefone, cliente) {
-  if (!confirm(`Cancelar Pedido #${id}?`)) return;
-
-  const motivo = prompt("Motivo do cancelamento:", "Produto indisponível");
-  if (!motivo) return;
-
-  await fazerRequisicao({ acao: "atualizarStatus", idPedido: id, status: "Cancelado" });
-
-  const msg = `Olá ${cliente},%0A%0APedimos desculpas, mas o Pedido #${id} foi cancelado.%0AMotivo: ${motivo}.%0A%0ASentimos muito.`;
-  const numero = telefone.replace(/\D/g, '');
-  window.open(`https://wa.me/${numero}?text=${msg}`, "_blank");
-
-  setTimeout(() => { carregarPedidos(); carregarCancelados(); }, 1000);
+// ==================== MODAL PRODUTO ====================
+function novoProduto() {
+  produtoEditando = null;
+  document.getElementById("modalTitulo").textContent = "Novo Produto";
+  document.getElementById("prodNome").value = "";
+  document.getElementById("prodPreco").value = "";
+  document.getElementById("prodCategoria").value = "";
+  document.getElementById("prodImagem").value = "";
+  document.getElementById("modalProduto").style.display = "flex";
 }
 
-// Init
-if (localStorage.getItem("adminLogado")) mostrarPainel();
+function editarProduto(id) {
+  produtoEditando = id;
+  document.getElementById("modalTitulo").textContent = "Editar Produto";
+  document.getElementById("modalProduto").style.display = "flex";
+}
+
+function fecharModal() {
+  document.getElementById("modalProduto").style.display = "none";
+}
+
+async function salvarModal() {
+  const nome = document.getElementById("prodNome").value.trim();
+  const preco = document.getElementById("prodPreco").value;
+  const categoria = document.getElementById("prodCategoria").value.trim();
+  const imagem = document.getElementById("prodImagem").value.trim();
+
+  if (!nome || !preco) {
+    alert("Nome e Preço são obrigatórios!");
+    return;
+  }
+
+  const dados = {
+    acao: "salvarProduto",
+    id: produtoEditando,
+    nome: nome,
+    preco: preco,
+    categoria: categoria,
+    imagem: imagem || "https://placehold.co/600x400"
+  };
+
+  const resultado = await fazerRequisicao(dados);
+  if (resultado.success) {
+    alert("✅ Produto salvo com sucesso!");
+    fecharModal();
+    carregarProdutos();
+  } else {
+    alert("❌ Erro ao salvar produto");
+  }
+}
+
+async function excluirProduto(id) {
+  if (!confirm("Tem certeza que deseja excluir este produto?")) return;
+  
+  const resultado = await fazerRequisicao({ acao: "excluirProduto", id: id });
+  if (resultado.success) {
+    alert("🗑 Produto excluído!");
+    carregarProdutos();
+  } else {
+    alert("❌ Erro ao excluir produto");
+  }
+}
+
+// Auto login
+if (localStorage.getItem("adminLogado")) {
+  mostrarPainel();
+}
 </script>
 </body>
 </html>
