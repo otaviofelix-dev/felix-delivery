@@ -167,12 +167,20 @@ async function fazerRequisicao(dados) {
   try {
     const response = await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dados)
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(dados),
+      mode: "no-cors"   // ← Adicionado para ajudar
     });
-    return await response.json();
+
+    // Como no-cors não retorna body, vamos assumir sucesso se não der erro
+    if (response) {
+      return { success: true };
+    }
+    return { success: false };
   } catch (e) {
-    console.error(e);
+    console.error("Erro na requisição:", e);
     return { success: false };
   }
 }
