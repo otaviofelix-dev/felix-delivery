@@ -121,7 +121,12 @@
   <div id="pedidos-section" style="display:none;">
     <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
     <h2>📋 Todos os Pedidos</h2>
-    <div id="pedidos"></div>
+    <div id="pedidos-kanban" style="
+  display:flex;
+  gap:20px;
+  overflow-x:auto;
+  padding-bottom:10px;
+"></div>
   </div>
 
   <!-- PEDIDOS CANCELADOS -->
@@ -247,69 +252,179 @@ async function carregarDashboard() {
 
 // ==================== PEDIDOS ====================
 async function carregarPedidos() {
+
   try {
+
     const res = await fetch(API + "?pedidos=1");
+
     const pedidos = await res.json();
+
+    pedidos.reverse();
+
+    const statusLista = [
+
+      {
+        nome: "Pendente",
+        cor: "#ff9800"
+      },
+
+      {
+        nome: "Em preparo",
+        cor: "#00d4ff"
+      },
+
+      {
+        nome: "Saiu para entrega",
+        cor: "#9c27b0"
+      },
+
+      {
+        nome: "Entregue",
+        cor: "#00ff9d"
+      },
+
+      {
+        nome: "Cancelado",
+        cor: "#ff3b5c"
+      }
+
+    ];
+
     let html = "";
 
-    pedidos.reverse().forEach(p => {
+    statusLista.forEach(statusColuna => {
+
+      const pedidosFiltrados =
+        pedidos.filter(p => p.status === statusColuna.nome);
+
       html += `
+
+      <div style="
+        min-width:320px;
+        background:#16161d;
+        border-radius:18px;
+        padding:15px;
+        flex-shrink:0;
+        border-top:5px solid ${statusColuna.cor};
+      ">
+
+        <h2 style="
+          margin-bottom:20px;
+          color:${statusColuna.cor};
+          text-align:center;
+        ">
+          ${statusColuna.nome}
+          (${pedidosFiltrados.length})
+        </h2>
+
+      `;
+
+      if (pedidosFiltrados.length === 0) {
+
+        html += `
+          <p style="
+            opacity:.6;
+            text-align:center;
+            margin-top:40px;
+          ">
+            Nenhum pedido
+          </p>
+        `;
+      }
+
+      pedidosFiltrados.forEach(p => {
+
+        html += `
+
         <div class="card">
-          <strong style="color:var(--accent)">Pedido #${p.idPedido}</strong><br><br>
-          👤 ${p.cliente} | 📞 ${p.telefone}<br>
-          📍 ${p.endereco}<br><br>
-          🍔 ${p.itens}<br><br>
-          💰 <strong style="color:var(--green)">R$ ${parseFloat(p.total||0).toFixed(2)}</strong><br><br>
-          <div style="margin-top:15px;">
-  <label>Status:</label><br><br>
 
-  <select id="status-${p.idPedido}"
-    style="
-      padding:10px;
-      border-radius:8px;
-      background:#2a2a32;
-      color:white;
-      border:none;
-    ">
+          <strong style="color:var(--accent)">
+            Pedido #${p.idPedido}
+          </strong>
 
-    <option value="Pendente"
-      ${p.status === "Pendente" ? "selected" : ""}>
-      Pendente
-    </option>
+          <br><br>
 
-    <option value="Em preparo"
-      ${p.status === "Em preparo" ? "selected" : ""}>
-      Em preparo
-    </option>
+          👤 ${p.cliente}<br>
+          📞 ${p.telefone}<br>
+          📍 ${p.endereco}
 
-    <option value="Saiu para entrega"
-      ${p.status === "Saiu para entrega" ? "selected" : ""}>
-      Saiu para entrega
-    </option>
+          <br><br>
 
-    <option value="Entregue"
-      ${p.status === "Entregue" ? "selected" : ""}>
-      Entregue
-    </option>
+          🍔 ${p.itens}
 
-    <option value="Cancelado"
-      ${p.status === "Cancelado" ? "selected" : ""}>
-      Cancelado
-    </option>
+          <br><br>
 
-  </select>
+          💰 <strong style="color:var(--green)">
+            R$ ${parseFloat(p.total || 0).toFixed(2)}
+          </strong>
 
-  <button class="btn-primary"
-    onclick="alterarStatus('${p.idPedido}')">
-    Salvar
-  </button>
-</div>
-        </div>`;
+          <br><br>
+
+          <select
+            id="status-${p.idPedido}"
+
+            style="
+              width:100%;
+              padding:12px;
+              border-radius:10px;
+              background:#2a2a32;
+              color:white;
+              border:none;
+              margin-bottom:10px;
+            "
+          >
+
+            <option value="Pendente"
+              ${p.status === "Pendente" ? "selected" : ""}>
+              Pendente
+            </option>
+
+            <option value="Em preparo"
+              ${p.status === "Em preparo" ? "selected" : ""}>
+              Em preparo
+            </option>
+
+            <option value="Saiu para entrega"
+              ${p.status === "Saiu para entrega" ? "selected" : ""}>
+              Saiu para entrega
+            </option>
+
+            <option value="Entregue"
+              ${p.status === "Entregue" ? "selected" : ""}>
+              Entregue
+            </option>
+
+            <option value="Cancelado"
+              ${p.status === "Cancelado" ? "selected" : ""}>
+              Cancelado
+            </option>
+
+          </select>
+
+          <button
+            class="btn-primary"
+            style="width:100%;"
+            onclick="alterarStatus('${p.idPedido}')"
+          >
+            Salvar Status
+          </button>
+
+        </div>
+
+        `;
+      });
+
+      html += `</div>`;
     });
 
-    document.getElementById("pedidos").innerHTML = html || "<p>Nenhum pedido encontrado.</p>";
+    document.getElementById("pedidos-kanban").innerHTML = html;
+
   } catch (e) {
-    document.getElementById("pedidos").innerHTML = "<p>Erro ao carregar pedidos.</p>";
+
+    console.log(e);
+
+    document.getElementById("pedidos-kanban").innerHTML =
+      "<p>Erro ao carregar pedidos.</p>";
   }
 }
 
