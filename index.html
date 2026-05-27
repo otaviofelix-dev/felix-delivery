@@ -51,6 +51,86 @@
     .btn-danger { background: var(--red); color: white; }
     .btn-back { background: #333; color: white; }
 
+/* ==================== KANBAN ==================== */
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.kanban-coluna {
+  background: #16161d;
+  border-radius: 18px;
+  padding: 14px;
+  min-height: 300px;
+}
+
+.kanban-titulo {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.pedido-card {
+  background: #1f1f28;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid #2a2a32;
+  transition: .2s;
+}
+
+.pedido-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.pedido-info {
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.pedido-total {
+  color: var(--green);
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.status-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  background: #2a2a32;
+  color: white;
+  border: none;
+  margin-top: 10px;
+}
+
+.btn-status {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* ==================== MOBILE ==================== */
+
+@media (max-width: 768px) {
+
+  .kanban {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  .kanban-coluna {
+    min-width: 300px;
+    flex-shrink: 0;
+  }
+
+}
+
     /* Modal */
     .modal {
       display: none;
@@ -121,12 +201,7 @@
   <div id="pedidos-section" style="display:none;">
     <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
     <h2>📋 Todos os Pedidos</h2>
-    <div id="pedidos-kanban" style="
-  display:flex;
-  gap:20px;
-  overflow-x:auto;
-  padding-bottom:10px;
-"></div>
+   <div id="pedidos-kanban" class="kanban"></div>
   </div>
 
   <!-- PEDIDOS CANCELADOS -->
@@ -163,7 +238,7 @@
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxu_uvbSEjbKj2RbunHe-DKYlx30KhPrCbyDchz4QEp1Xz_N-iDDTYDjhuIrZ-i_d7oiQ/exec";
+const API = "https://script.google.com/macros/s/AKfycbxJrnbC_4yVaXtetK_4Eo1IYJ-Y6CWWCWc7J_QKaW58pA1lwRKXedDIT-1hk0YmLjaUqA/exec";
 
 let produtoEditando = null;
 
@@ -251,6 +326,7 @@ async function carregarDashboard() {
 }
 
 // ==================== PEDIDOS ====================
+// ==================== PEDIDOS ====================
 async function carregarPedidos() {
 
   try {
@@ -299,22 +375,15 @@ async function carregarPedidos() {
 
       html += `
 
-      <div style="
-        min-width:320px;
-        background:#16161d;
-        border-radius:18px;
-        padding:15px;
-        flex-shrink:0;
-        border-top:5px solid ${statusColuna.cor};
-      ">
+      <div class="kanban-coluna"
+        style="border-top:5px solid ${statusColuna.cor};">
 
-        <h2 style="
-          margin-bottom:20px;
-          color:${statusColuna.cor};
-          text-align:center;
-        ">
+        <h2 class="kanban-titulo"
+          style="color:${statusColuna.cor};">
+
           ${statusColuna.nome}
           (${pedidosFiltrados.length})
+
         </h2>
 
       `;
@@ -336,42 +405,39 @@ async function carregarPedidos() {
 
         html += `
 
-        <div class="card">
+        <div class="pedido-card">
 
-          <strong style="color:var(--accent)">
-            Pedido #${p.idPedido}
-          </strong>
+          <div class="pedido-info">
 
-          <br><br>
+            <strong style="color:var(--accent)">
+              #${p.idPedido}
+            </strong>
 
-          👤 ${p.cliente}<br>
-          📞 ${p.telefone}<br>
-          📍 ${p.endereco}
+            <br><br>
 
-          <br><br>
+            👤 ${p.cliente}<br>
 
-          🍔 ${p.itens}
+            📞 ${p.telefone}
 
-          <br><br>
+            <br><br>
 
-          💰 <strong style="color:var(--green)">
-            R$ ${parseFloat(p.total || 0).toFixed(2)}
-          </strong>
+            📍 ${p.endereco}
 
-          <br><br>
+            <br><br>
+
+            🍔 ${p.itens}
+
+            <br><br>
+
+            <div class="pedido-total">
+              R$ ${parseFloat(p.total || 0).toFixed(2)}
+            </div>
+
+          </div>
 
           <select
             id="status-${p.idPedido}"
-
-            style="
-              width:100%;
-              padding:12px;
-              border-radius:10px;
-              background:#2a2a32;
-              color:white;
-              border:none;
-              margin-bottom:10px;
-            "
+            class="status-select"
           >
 
             <option value="Pendente"
@@ -402,19 +468,21 @@ async function carregarPedidos() {
           </select>
 
           <button
-            class="btn-primary"
-            style="width:100%;"
+            class="btn-primary btn-status"
             onclick="alterarStatus('${p.idPedido}')"
           >
-            Salvar Status
+            Atualizar
           </button>
 
         </div>
 
         `;
+
       });
 
+      // FECHA A COLUNA
       html += `</div>`;
+
     });
 
     document.getElementById("pedidos-kanban").innerHTML = html;
@@ -425,6 +493,7 @@ async function carregarPedidos() {
 
     document.getElementById("pedidos-kanban").innerHTML =
       "<p>Erro ao carregar pedidos.</p>";
+
   }
 }
 
