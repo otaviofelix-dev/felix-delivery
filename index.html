@@ -158,7 +158,7 @@
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbz4X89MZ60TUVIKERHk8BZ6Hzh-8MuN8uNl8KFU1CqeYDXnLa050oHc1Lhjr2asj_uxaQ/exec";
+const API = "https://script.google.com/macros/s/AKfycbwq56Z_nRq9QluckGZZ7tpxs5-VaE94pRt4RMyBsFL-57bEh8xB83vUYVUlXZurw1QNWQ/exec";
 
 let produtoEditando = null;
 
@@ -260,7 +260,50 @@ async function carregarPedidos() {
           📍 ${p.endereco}<br><br>
           🍔 ${p.itens}<br><br>
           💰 <strong style="color:var(--green)">R$ ${parseFloat(p.total||0).toFixed(2)}</strong><br><br>
-          Status: <b>${p.status}</b>
+          <div style="margin-top:15px;">
+  <label>Status:</label><br><br>
+
+  <select id="status-${p.idPedido}"
+    style="
+      padding:10px;
+      border-radius:8px;
+      background:#2a2a32;
+      color:white;
+      border:none;
+    ">
+
+    <option value="Pendente"
+      ${p.status === "Pendente" ? "selected" : ""}>
+      Pendente
+    </option>
+
+    <option value="Em preparo"
+      ${p.status === "Em preparo" ? "selected" : ""}>
+      Em preparo
+    </option>
+
+    <option value="Saiu para entrega"
+      ${p.status === "Saiu para entrega" ? "selected" : ""}>
+      Saiu para entrega
+    </option>
+
+    <option value="Entregue"
+      ${p.status === "Entregue" ? "selected" : ""}>
+      Entregue
+    </option>
+
+    <option value="Cancelado"
+      ${p.status === "Cancelado" ? "selected" : ""}>
+      Cancelado
+    </option>
+
+  </select>
+
+  <button class="btn-primary"
+    onclick="alterarStatus('${p.idPedido}')">
+    Salvar
+  </button>
+</div>
         </div>`;
     });
 
@@ -390,6 +433,33 @@ async function excluirProduto(id) {
 if (localStorage.getItem("adminLogado")) {
   mostrarPainel();
 }
+
+// ==================== ALTERAR STATUS ====================
+async function alterarStatus(idPedido) {
+
+  const novoStatus =
+    document.getElementById(`status-${idPedido}`).value;
+
+  const resultado = await fazerRequisicao({
+    acao: "alterarStatus",
+    idPedido: idPedido,
+    status: novoStatus
+  });
+
+  if (resultado.success) {
+
+    alert("✅ Status atualizado!");
+
+    carregarPedidos();
+    carregarDashboard();
+
+  } else {
+
+    alert("❌ Erro ao atualizar status");
+
+  }
+}
+
 </script>
 </body>
 </html>
