@@ -141,7 +141,6 @@
       margin-top: 8px;
     }
 
-    /* ==================== MOBILE ==================== */
     @media (max-width: 768px) {
       .kanban {
         display: flex;
@@ -154,7 +153,6 @@
       }
     }
 
-    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -172,7 +170,7 @@
       width: 90%;
       max-width: 420px;
     }
-    input {
+    input, textarea {
       width: 100%;
       padding: 12px;
       margin: 10px 0;
@@ -212,6 +210,7 @@
       <button class="btn-primary" onclick="abrirPedidos()">📋 Todos os Pedidos</button>
       <button class="btn-primary" onclick="abrirCancelados()">❌ Pedidos Cancelados</button>
       <button class="btn-primary" onclick="abrirProdutos()">📦 Gerenciar Produtos</button>
+      <button class="btn-primary" onclick="abrirConfiguracoes()">⚙️ Configurações</button>
     </div>
     <div style="display:flex; gap:20px; flex-wrap:wrap;">
       <div class="card" style="flex:1; text-align:center;">
@@ -246,13 +245,50 @@
     <button class="btn-primary" onclick="novoProduto()">+ Novo Produto</button>
     <div id="listaProdutos"></div>
   </div>
+
+  <!-- CONFIGURAÇÕES -->
+  <div id="config-section" style="display:none;">
+    <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
+    <h2 style="margin-bottom:20px;">⚙️ Configurações da Loja</h2>
+
+    <div class="card">
+      <h3>🎨 Personalização</h3>
+      <input type="text" id="nomeLoja" placeholder="Nome da Loja">
+      <label>Cor principal</label>
+      <input type="color" id="corSistema" value="#00d4ff" style="width:100%; height:60px;">
+      <input type="text" id="logoLoja" placeholder="URL da Logo">
+      <button class="btn-primary" onclick="salvarConfiguracoes()" style="width:100%; margin-top:15px;">
+        💾 Salvar Configurações
+      </button>
+    </div>
+
+    <div class="card">
+      <h3>🚚 Delivery</h3>
+      <input type="text" id="taxaEntrega" placeholder="Taxa de entrega">
+      <input type="text" id="tempoEntrega" placeholder="Tempo médio">
+      <input type="text" id="pedidoMinimo" placeholder="Pedido mínimo">
+    </div>
+
+    <div class="card">
+      <h3>📱 WhatsApp</h3>
+      <input type="text" id="whatsappLoja" placeholder="WhatsApp">
+      <textarea id="mensagemAuto" placeholder="Mensagem automática" style="min-height:120px;"></textarea>
+    </div>
+
+    <div class="card">
+      <h3>🟢 Status da Loja</h3>
+      <button id="btnLoja" class="btn-primary" onclick="toggleLoja()" style="width:100%; padding:18px; font-size:18px;">
+        🟢 Loja Aberta
+      </button>
+    </div>
+  </div>
+
 </div>
 
 <!-- MODAL PARA PRODUTOS -->
 <div id="modalProduto" class="modal">
   <div class="modal-content">
     <h3 id="modalTitulo">Novo Produto</h3>
-    
     <input type="text" id="prodNome" placeholder="Nome do produto" required>
     <input type="number" id="prodPreco" placeholder="Preço (ex: 29.90)" step="0.01" required>
     <input type="text" id="prodCategoria" placeholder="Categoria (ex: Lanches, Bebidas)">
@@ -282,7 +318,7 @@ function esconderLoading() {
 // ==================== REQUISIÇÃO ====================
 async function fazerRequisicao(dados) {
   try {
-    const response = await fetch(API, {
+    await fetch(API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados),
@@ -323,6 +359,7 @@ function voltarParaMenu() {
   document.getElementById("pedidos-section").style.display = "none";
   document.getElementById("cancelados-section").style.display = "none";
   document.getElementById("produtos-section").style.display = "none";
+  document.getElementById("config-section").style.display = "none";
 }
 
 function abrirPedidos() {
@@ -341,6 +378,15 @@ function abrirProdutos() {
   document.getElementById("painel").style.display = "none";
   document.getElementById("produtos-section").style.display = "block";
   carregarProdutos();
+}
+
+function abrirConfiguracoes() {
+  document.getElementById("painel").style.display = "none";
+  document.getElementById("pedidos-section").style.display = "none";
+  document.getElementById("cancelados-section").style.display = "none";
+  document.getElementById("produtos-section").style.display = "none";
+  document.getElementById("config-section").style.display = "block";
+  carregarConfiguracoes();
 }
 
 // ==================== DASHBOARD ====================
@@ -500,6 +546,7 @@ function editarProduto(id) {
   produtoEditando = id;
   document.getElementById("modalTitulo").textContent = "Editar Produto";
   document.getElementById("modalProduto").style.display = "flex";
+  // Aqui você pode carregar os dados do produto se quiser
 }
 
 function fecharModal() {
@@ -567,10 +614,67 @@ async function alterarStatus(idPedido) {
   }
 }
 
+// ==================== CONFIGURAÇÕES ====================
+function salvarConfiguracoes() {
+  localStorage.setItem("nomeLoja", document.getElementById("nomeLoja").value);
+  localStorage.setItem("corSistema", document.getElementById("corSistema").value);
+  localStorage.setItem("logoLoja", document.getElementById("logoLoja").value);
+  localStorage.setItem("taxaEntrega", document.getElementById("taxaEntrega").value);
+  localStorage.setItem("tempoEntrega", document.getElementById("tempoEntrega").value);
+  localStorage.setItem("pedidoMinimo", document.getElementById("pedidoMinimo").value);
+  localStorage.setItem("whatsappLoja", document.getElementById("whatsappLoja").value);
+  localStorage.setItem("mensagemAuto", document.getElementById("mensagemAuto").value);
+
+  aplicarConfiguracoes();
+  alert("✅ Configurações salvas!");
+}
+
+function carregarConfiguracoes() {
+  document.getElementById("nomeLoja").value = localStorage.getItem("nomeLoja") || "";
+  document.getElementById("corSistema").value = localStorage.getItem("corSistema") || "#00d4ff";
+  document.getElementById("logoLoja").value = localStorage.getItem("logoLoja") || "";
+  document.getElementById("taxaEntrega").value = localStorage.getItem("taxaEntrega") || "";
+  document.getElementById("tempoEntrega").value = localStorage.getItem("tempoEntrega") || "";
+  document.getElementById("pedidoMinimo").value = localStorage.getItem("pedidoMinimo") || "";
+  document.getElementById("whatsappLoja").value = localStorage.getItem("whatsappLoja") || "";
+  document.getElementById("mensagemAuto").value = localStorage.getItem("mensagemAuto") || "";
+}
+
+function aplicarConfiguracoes() {
+  const nome = localStorage.getItem("nomeLoja");
+  const cor = localStorage.getItem("corSistema");
+
+  if (nome) {
+    document.querySelector("header h2").innerHTML = `🔧 ${nome}`;
+  }
+  if (cor) {
+    document.documentElement.style.setProperty("--accent", cor);
+  }
+}
+
+function toggleLoja() {
+  const status = localStorage.getItem("lojaFechada");
+  const btn = document.getElementById("btnLoja");
+
+  if (status === "sim") {
+    localStorage.setItem("lojaFechada", "nao");
+    btn.innerHTML = "🟢 Loja Aberta";
+    btn.style.background = "#00ff9d";
+    btn.style.color = "#000";
+  } else {
+    localStorage.setItem("lojaFechada", "sim");
+    btn.innerHTML = "🔴 Loja Fechada";
+    btn.style.background = "#ff3b5c";
+    btn.style.color = "#fff";
+  }
+}
+
 // Auto login
 if (localStorage.getItem("adminLogado")) {
   mostrarPainel();
 }
+
+aplicarConfiguracoes();
 </script>
 </body>
 </html>
