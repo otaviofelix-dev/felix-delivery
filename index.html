@@ -451,7 +451,27 @@ async function carregarPedidos() {
               
               👤 ${p.cliente}<br>
               📞 ${p.telefone}<br><br>
-              📍 ${p.endereco}<br><br>
+              📍 ${p.endereco}
+
+<br>
+
+<button
+  onclick="abrirMapa('${encodeURIComponent(p.endereco)}')"
+  style="
+    margin-top:8px;
+    width:100%;
+    background:#34a853;
+    color:white;
+    border:none;
+    padding:10px;
+    border-radius:8px;
+    cursor:pointer;
+  "
+>
+  📍 Abrir no Maps
+</button>
+
+<br><br>
               🍔 ${p.itens}<br>
               
               <div class="pedido-total">R$ ${parseFloat(p.total || 0).toFixed(2)}</div>
@@ -636,6 +656,15 @@ function salvarConfiguracoes() {
 
   aplicarConfiguracoes();
   alert("✅ Configurações salvas!");
+}
+
+function abrirMapa(endereco) {
+
+  const url =
+    `https://www.google.com/maps/search/?api=1&query=${endereco}`;
+
+  window.open(url, "_blank");
+
 }
 
 function carregarConfiguracoes() {
