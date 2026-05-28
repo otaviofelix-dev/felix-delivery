@@ -51,85 +51,108 @@
     .btn-danger { background: var(--red); color: white; }
     .btn-back { background: #333; color: white; }
 
-/* ==================== KANBAN ==================== */
+    /* ==================== LOADING ==================== */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15,15,18,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(4px);
+    }
 
-.kanban {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  align-items: start;
-}
+    .spinner {
+      width: 70px;
+      height: 70px;
+      border: 6px solid #2a2a32;
+      border-top: 6px solid var(--accent);
+      border-radius: 50%;
+      animation: girar 0.8s linear infinite;
+    }
 
-.kanban-coluna {
-  background: #16161d;
-  border-radius: 18px;
-  padding: 14px;
-  min-height: 300px;
-}
+    @keyframes girar {
+      100% { transform: rotate(360deg); }
+    }
 
-.kanban-titulo {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 15px;
-  text-align: center;
-}
+    /* ==================== KANBAN ==================== */
+    .kanban {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
 
-.pedido-card {
-  background: #1f1f28;
-  border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 12px;
-  border: 1px solid #2a2a32;
-  transition: .2s;
-}
+    .kanban-coluna {
+      background: #16161d;
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 300px;
+    }
 
-.pedido-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
-}
+    .kanban-titulo {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-align: center;
+    }
 
-.pedido-info {
-  line-height: 1.5;
-  font-size: 14px;
-}
+    .pedido-card {
+      background: #1f1f28;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid #2a2a32;
+      transition: .2s;
+    }
 
-.pedido-total {
-  color: var(--green);
-  font-size: 20px;
-  font-weight: bold;
-}
+    .pedido-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
 
-.status-select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  background: #2a2a32;
-  color: white;
-  border: none;
-  margin-top: 10px;
-}
+    .pedido-info {
+      line-height: 1.5;
+      font-size: 14px;
+    }
 
-.btn-status {
-  width: 100%;
-  margin-top: 8px;
-}
+    .pedido-total {
+      color: var(--green);
+      font-size: 20px;
+      font-weight: bold;
+    }
 
-/* ==================== MOBILE ==================== */
+    .status-select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      background: #2a2a32;
+      color: white;
+      border: none;
+      margin-top: 10px;
+    }
 
-@media (max-width: 768px) {
+    .btn-status {
+      width: 100%;
+      margin-top: 8px;
+    }
 
-  .kanban {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 10px;
-  }
-
-  .kanban-coluna {
-    min-width: 300px;
-    flex-shrink: 0;
-  }
-
-}
+    /* ==================== MOBILE ==================== */
+    @media (max-width: 768px) {
+      .kanban {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+      .kanban-coluna {
+        min-width: 300px;
+        flex-shrink: 0;
+      }
+    }
 
     /* Modal */
     .modal {
@@ -163,6 +186,11 @@
 <body>
 
 <div class="container">
+
+  <!-- LOADING -->
+  <div id="loading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
 
   <header>
     <h2>🔧 Painel Admin - Felix Delivery</h2>
@@ -201,7 +229,7 @@
   <div id="pedidos-section" style="display:none;">
     <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
     <h2>📋 Todos os Pedidos</h2>
-   <div id="pedidos-kanban" class="kanban"></div>
+    <div id="pedidos-kanban" class="kanban"></div>
   </div>
 
   <!-- PEDIDOS CANCELADOS -->
@@ -242,23 +270,25 @@ const API = "https://script.google.com/macros/s/AKfycbxJrnbC_4yVaXtetK_4Eo1IYJ-Y
 
 let produtoEditando = null;
 
+// ==================== LOADING ====================
+function mostrarLoading() {
+  document.getElementById("loading").style.display = "flex";
+}
+
+function esconderLoading() {
+  document.getElementById("loading").style.display = "none";
+}
+
 // ==================== REQUISIÇÃO ====================
 async function fazerRequisicao(dados) {
   try {
     const response = await fetch(API, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados),
-      mode: "no-cors"   // ← Adicionado para ajudar
+      mode: "no-cors"
     });
-
-    // Como no-cors não retorna body, vamos assumir sucesso se não der erro
-    if (response) {
-      return { success: true };
-    }
-    return { success: false };
+    return { success: true };
   } catch (e) {
     console.error("Erro na requisição:", e);
     return { success: false };
@@ -315,6 +345,7 @@ function abrirProdutos() {
 
 // ==================== DASHBOARD ====================
 async function carregarDashboard() {
+  mostrarLoading();
   try {
     const res = await fetch(API + "?pedidos=1");
     const pedidos = await res.json();
@@ -322,207 +353,108 @@ async function carregarDashboard() {
     const valor = pedidos.reduce((s, p) => s + parseFloat(p.total || 0), 0);
     document.getElementById("total-pedidos").textContent = total;
     document.getElementById("valor-total").textContent = "R$ " + valor.toFixed(2);
-  } catch (e) { console.log(e); }
+  } catch (e) {
+    console.log(e);
+  } finally {
+    esconderLoading();
+  }
 }
 
-// ==================== PEDIDOS ====================
-// ==================== PEDIDOS ====================
+// ==================== PEDIDOS (KANBAN) ====================
 async function carregarPedidos() {
-
+  mostrarLoading();
   try {
-
     const res = await fetch(API + "?pedidos=1");
-
     const pedidos = await res.json();
-
     pedidos.reverse();
 
     const statusLista = [
-
-      {
-        nome: "Pendente",
-        cor: "#ff9800"
-      },
-
-      {
-        nome: "Em preparo",
-        cor: "#00d4ff"
-      },
-
-      {
-        nome: "Saiu para entrega",
-        cor: "#9c27b0"
-      },
-
-      {
-        nome: "Entregue",
-        cor: "#00ff9d"
-      },
-
-      {
-        nome: "Cancelado",
-        cor: "#ff3b5c"
-      }
-
+      { nome: "Pendente", cor: "#ff9800" },
+      { nome: "Em preparo", cor: "#00d4ff" },
+      { nome: "Saiu para entrega", cor: "#9c27b0" },
+      { nome: "Entregue", cor: "#00ff9d" },
+      { nome: "Cancelado", cor: "#ff3b5c" }
     ];
 
     let html = "";
 
     statusLista.forEach(statusColuna => {
-
-      const pedidosFiltrados =
-        pedidos.filter(p => p.status === statusColuna.nome);
+      const pedidosFiltrados = pedidos.filter(p => p.status === statusColuna.nome);
 
       html += `
-
-      <div class="kanban-coluna"
-        style="border-top:5px solid ${statusColuna.cor};">
-
-        <h2 class="kanban-titulo"
-          style="color:${statusColuna.cor};">
-
-          ${statusColuna.nome}
-          (${pedidosFiltrados.length})
-
-        </h2>
-
-      `;
+        <div class="kanban-coluna" style="border-top:5px solid ${statusColuna.cor};">
+          <h2 class="kanban-titulo" style="color:${statusColuna.cor};">
+            ${statusColuna.nome} (${pedidosFiltrados.length})
+          </h2>`;
 
       if (pedidosFiltrados.length === 0) {
-
-        html += `
-          <p style="
-            opacity:.6;
-            text-align:center;
-            margin-top:40px;
-          ">
-            Nenhum pedido
-          </p>
-        `;
+        html += `<p style="opacity:.6; text-align:center; margin-top:40px;">Nenhum pedido</p>`;
       }
 
       pedidosFiltrados.forEach(p => {
-
         html += `
-
-        <div class="pedido-card">
-
-          <div class="pedido-info">
-
-            <strong style="color:var(--accent)">
-              #${p.idPedido}
-            </strong>
-
-            <br><br>
-
-            👤 ${p.cliente}<br>
-
-            📞 ${p.telefone}
-
-            <br><br>
-
-            📍 ${p.endereco}
-
-            <br><br>
-
-            🍔 ${p.itens}
-
-            <br><br>
-
-            <div class="pedido-total">
-              R$ ${parseFloat(p.total || 0).toFixed(2)}
+          <div class="pedido-card">
+            <div class="pedido-info">
+              <strong style="color:var(--accent)">#${p.idPedido}</strong><br><br>
+              👤 ${p.cliente}<br>
+              📞 ${p.telefone}<br><br>
+              📍 ${p.endereco}<br><br>
+              🍔 ${p.itens}<br><br>
+              <div class="pedido-total">R$ ${parseFloat(p.total || 0).toFixed(2)}</div>
             </div>
-
-          </div>
-
-          <select
-            id="status-${p.idPedido}"
-            class="status-select"
-          >
-
-            <option value="Pendente"
-              ${p.status === "Pendente" ? "selected" : ""}>
-              Pendente
-            </option>
-
-            <option value="Em preparo"
-              ${p.status === "Em preparo" ? "selected" : ""}>
-              Em preparo
-            </option>
-
-            <option value="Saiu para entrega"
-              ${p.status === "Saiu para entrega" ? "selected" : ""}>
-              Saiu para entrega
-            </option>
-
-            <option value="Entregue"
-              ${p.status === "Entregue" ? "selected" : ""}>
-              Entregue
-            </option>
-
-            <option value="Cancelado"
-              ${p.status === "Cancelado" ? "selected" : ""}>
-              Cancelado
-            </option>
-
-          </select>
-
-          <button
-            class="btn-primary btn-status"
-            onclick="alterarStatus('${p.idPedido}')"
-          >
-            Atualizar
-          </button>
-
-        </div>
-
-        `;
-
+            <select id="status-${p.idPedido}" class="status-select">
+              <option value="Pendente" ${p.status === "Pendente" ? "selected" : ""}>Pendente</option>
+              <option value="Em preparo" ${p.status === "Em preparo" ? "selected" : ""}>Em preparo</option>
+              <option value="Saiu para entrega" ${p.status === "Saiu para entrega" ? "selected" : ""}>Saiu para entrega</option>
+              <option value="Entregue" ${p.status === "Entregue" ? "selected" : ""}>Entregue</option>
+              <option value="Cancelado" ${p.status === "Cancelado" ? "selected" : ""}>Cancelado</option>
+            </select>
+            <button class="btn-primary btn-status" onclick="alterarStatus('${p.idPedido}')">Atualizar</button>
+          </div>`;
       });
 
-      // FECHA A COLUNA
       html += `</div>`;
-
     });
 
     document.getElementById("pedidos-kanban").innerHTML = html;
-
   } catch (e) {
-
     console.log(e);
-
-    document.getElementById("pedidos-kanban").innerHTML =
-      "<p>Erro ao carregar pedidos.</p>";
-
+    document.getElementById("pedidos-kanban").innerHTML = "<p>Erro ao carregar pedidos.</p>";
+  } finally {
+    esconderLoading();
   }
 }
 
 // ==================== CANCELADOS ====================
 async function carregarCancelados() {
+  mostrarLoading();
   try {
     const res = await fetch(API + "?pedidos=1");
     const pedidos = await res.json();
     const cancelados = pedidos.filter(p => p.status === "Cancelado");
-    let html = "";
 
+    let html = "";
     cancelados.forEach(p => {
       html += `
         <div class="card" style="border-left: 5px solid var(--red);">
           <strong style="color:var(--red)">Pedido #${p.idPedido} (Cancelado)</strong><br><br>
           👤 ${p.cliente}<br>
           📞 ${p.telefone}<br><br>
-          💰 R$ ${parseFloat(p.total||0).toFixed(2)}
+          💰 R$ ${parseFloat(p.total || 0).toFixed(2)}
         </div>`;
     });
 
     document.getElementById("cancelados").innerHTML = html || "<p>Nenhum pedido cancelado.</p>";
   } catch (e) {
     document.getElementById("cancelados").innerHTML = "<p>Erro ao carregar.</p>";
+  } finally {
+    esconderLoading();
   }
 }
 
 // ==================== PRODUTOS ====================
 async function carregarProdutos() {
+  mostrarLoading();
   try {
     const res = await fetch(API + "?produtos=1");
     const produtos = await res.json();
@@ -532,7 +464,8 @@ async function carregarProdutos() {
     produtos.forEach(p => {
       html += `
         <div class="card" style="text-align:center;">
-          <img src="${p.imagem || 'https://placehold.co/600x400'}" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
+          <img src="${p.imagem || 'https://placehold.co/600x400'}" 
+               style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
           <h3 style="margin:12px 0 8px;">${p.nome}</h3>
           <h2 style="color:var(--green);">R$ ${parseFloat(p.preco).toFixed(2)}</h2>
           <p>${p.categoria || ""}</p>
@@ -547,6 +480,8 @@ async function carregarProdutos() {
     document.getElementById("listaProdutos").innerHTML = html || "<p>Nenhum produto cadastrado.</p>";
   } catch (e) {
     document.getElementById("listaProdutos").innerHTML = "<p>Erro ao carregar produtos.</p>";
+  } finally {
+    esconderLoading();
   }
 }
 
@@ -613,16 +548,9 @@ async function excluirProduto(id) {
   }
 }
 
-// Auto login
-if (localStorage.getItem("adminLogado")) {
-  mostrarPainel();
-}
-
 // ==================== ALTERAR STATUS ====================
 async function alterarStatus(idPedido) {
-
-  const novoStatus =
-    document.getElementById(`status-${idPedido}`).value;
+  const novoStatus = document.getElementById(`status-${idPedido}`).value;
 
   const resultado = await fazerRequisicao({
     acao: "alterarStatus",
@@ -631,19 +559,18 @@ async function alterarStatus(idPedido) {
   });
 
   if (resultado.success) {
-
     alert("✅ Status atualizado!");
-
     carregarPedidos();
     carregarDashboard();
-
   } else {
-
     alert("❌ Erro ao atualizar status");
-
   }
 }
 
+// Auto login
+if (localStorage.getItem("adminLogado")) {
+  mostrarPainel();
+}
 </script>
 </body>
 </html>
