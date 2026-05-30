@@ -739,9 +739,11 @@ async function alterarStatus(idPedido){
 
 // ==================== MAPA ====================
 function abrirMapa(endereco){
-  window.open(`[google.com](https://www.google.com/maps/search/?api=1&query=${endereco})`,"_blank");
+  window.open(
+    `https://www.google.com/maps/search/?api=1&query=${endereco}`,
+    "_blank"
+  );
 }
-
 // ==================== CONFIGURAÇÕES ====================
 function salvarConfiguracoes(){
   ["nomeLoja","corSistema","logoLoja","taxaEntrega","tempoEntrega","pedidoMinimo","whatsappLoja","mensagemAuto"]
