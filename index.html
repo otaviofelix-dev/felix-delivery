@@ -11,189 +11,109 @@
       --accent: #00d4ff;
       --green: #00ff9d;
       --red: #ff3b5c;
+      --yellow: #ffd600;
     }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: #e0e0e0;
-      padding: 15px;
-    }
-    .container { max-width: 1200px; margin: auto; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #e0e0e0; padding: 15px; }
+    .container { max-width: 1300px; margin: auto; }
 
     header {
       background: linear-gradient(135deg, #1a1a20, #25252e);
-      padding: 18px 25px;
-      border-radius: 16px;
-      margin-bottom: 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 18px 25px; border-radius: 16px; margin-bottom: 25px;
+      display: flex; justify-content: space-between; align-items: center;
     }
 
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 20px;
-      margin: 15px 0;
-      border: 1px solid #2a2a32;
-    }
+    .card { background: var(--card); border-radius: 16px; padding: 20px; margin: 15px 0; border: 1px solid #2a2a32; }
 
-    button {
-      padding: 12px 22px;
-      border: none;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      margin: 6px 8px 6px 0;
-    }
+    button { padding: 12px 22px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; margin: 6px 8px 6px 0; }
     .btn-primary { background: var(--accent); color: #000; }
-    .btn-danger { background: var(--red); color: white; }
-    .btn-back { background: #333; color: white; }
+    .btn-danger  { background: var(--red); color: white; }
+    .btn-back    { background: #333; color: white; }
+    .btn-yellow  { background: var(--yellow); color: #000; }
+    .btn-green   { background: var(--green); color: #000; }
 
-    /* ==================== LOADING ==================== */
+    /* LOADING */
     .loading-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(15,15,18,0.85);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      backdrop-filter: blur(4px);
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(15,15,18,0.85); display:none;
+      align-items:center; justify-content:center; z-index:9999; backdrop-filter:blur(4px);
     }
-
     .spinner {
-      width: 70px;
-      height: 70px;
-      border: 6px solid #2a2a32;
-      border-top: 6px solid var(--accent);
-      border-radius: 50%;
+      width:70px; height:70px; border:6px solid #2a2a32;
+      border-top:6px solid var(--accent); border-radius:50%;
       animation: girar 0.8s linear infinite;
     }
+    @keyframes girar { 100%{ transform:rotate(360deg); } }
 
-    @keyframes girar { 100% { transform: rotate(360deg); } }
-
-    /* ==================== KANBAN ==================== */
-    .kanban {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 14px;
-      align-items: start;
-    }
-
-    .kanban-coluna {
-      background: #16161d;
-      border-radius: 18px;
-      padding: 12px;
-      min-height: 300px;
-    }
-
-    .kanban-titulo {
-      font-size: 17px;
-      font-weight: bold;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-
+    /* KANBAN */
+    .kanban { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:14px; align-items:start; }
+    .kanban-coluna { background:#16161d; border-radius:18px; padding:12px; min-height:300px; }
+    .kanban-titulo { font-size:17px; font-weight:bold; margin-bottom:12px; text-align:center; }
     .pedido-card {
-      background: #1f1f28;
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 10px;
-      border: 1px solid #2a2a32;
-      transition: .2s;
-      font-size: 13.5px;
+      background:#1f1f28; border-radius:12px; padding:12px; margin-bottom:10px;
+      border:1px solid #2a2a32; transition:.2s; font-size:13.5px;
     }
-
-    .pedido-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent);
-    }
-
-    .pedido-info {
-      line-height: 1.4;
-    }
-
-    .pedido-data {
-      font-size: 12px;
-      color: #aaa;
-      margin-bottom: 8px;
-    }
-
-    .pedido-total {
-      color: var(--green);
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 8px;
-    }
-
+    .pedido-card:hover { transform:translateY(-2px); border-color:var(--accent); }
+    .pedido-info { line-height:1.6; }
+    .pedido-data { font-size:12px; color:#aaa; margin-bottom:8px; }
+    .pedido-total { color:var(--green); font-size:18px; font-weight:bold; margin-top:8px; }
     .status-select {
-      width: 100%;
-      padding: 8px;
-      border-radius: 8px;
-      background: #2a2a32;
-      color: white;
-      border: none;
-      margin: 8px 0 6px 0;
-      font-size: 13px;
+      width:100%; padding:8px; border-radius:8px; background:#2a2a32;
+      color:white; border:none; margin:8px 0 6px; font-size:13px;
     }
+    .btn-status { width:100%; padding:10px; font-size:13px; }
 
-    .btn-status {
-      width: 100%;
-      padding: 10px;
-      font-size: 13px;
+    /* RELATÓRIO */
+    .filtros { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+    .filtros input, .filtros select {
+      flex:1; min-width:160px; padding:10px; background:#2a2a32;
+      border:none; border-radius:10px; color:white; font-size:14px;
     }
-
-    @media (max-width: 768px) {
-      .kanban {
-        display: flex;
-        overflow-x: auto;
-        padding-bottom: 10px;
-      }
-      .kanban-coluna {
-        min-width: 280px;
-        flex-shrink: 0;
-      }
+    .relatorio-table { width:100%; border-collapse:collapse; font-size:13.5px; }
+    .relatorio-table th { background:#25252e; padding:12px 10px; text-align:left; color:var(--accent); }
+    .relatorio-table td { padding:10px; border-bottom:1px solid #2a2a32; vertical-align:top; }
+    .relatorio-table tr:hover td { background:#1f1f28; }
+    .badge {
+      display:inline-block; padding:3px 10px; border-radius:20px;
+      font-size:12px; font-weight:bold;
     }
+    .resumo-cards { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:25px; }
+    .resumo-card { background:#1f1f28; border-radius:12px; padding:16px 22px; flex:1; min-width:140px; text-align:center; border:1px solid #2a2a32; }
+    .resumo-card h4 { font-size:13px; color:#aaa; margin-bottom:6px; }
+    .resumo-card span { font-size:26px; font-weight:bold; }
 
+    /* PROMOÇÕES */
+    .promo-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:20px; }
+    .promo-card { background:#1f1f28; border-radius:14px; overflow:hidden; border:1px solid #2a2a32; }
+    .promo-card img { width:100%; height:160px; object-fit:cover; }
+    .promo-info { padding:14px; }
+    .promo-info h3 { margin-bottom:6px; }
+    .promo-inputs { display:flex; gap:10px; align-items:center; margin-top:10px; }
+    .promo-inputs input { flex:1; padding:8px; background:#2a2a32; border:none; border-radius:8px; color:white; }
+    .promo-badge { background:var(--yellow); color:#000; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:bold; }
+
+    /* MODAL */
     .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
+      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center;
     }
-    .modal-content {
-      background: #1f1f28;
-      padding: 25px;
-      border-radius: 16px;
-      width: 90%;
-      max-width: 420px;
-    }
+    .modal-content { background:#1f1f28; padding:25px; border-radius:16px; width:90%; max-width:420px; }
     input, textarea {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      background: #2a2a32;
-      border: none;
-      border-radius: 8px;
-      color: white;
+      width:100%; padding:12px; margin:10px 0;
+      background:#2a2a32; border:none; border-radius:8px; color:white;
+    }
+
+    @media(max-width:768px){
+      .kanban { display:flex; overflow-x:auto; padding-bottom:10px; }
+      .kanban-coluna { min-width:280px; flex-shrink:0; }
+      .relatorio-table { display:block; overflow-x:auto; }
     }
   </style>
 </head>
 <body>
-
 <div class="container">
 
-  <!-- LOADING -->
-  <div id="loading" class="loading-overlay">
-    <div class="spinner"></div>
-  </div>
+  <div id="loading" class="loading-overlay"><div class="spinner"></div></div>
 
   <header>
     <h2>🔧 Painel Admin - Felix Delivery</h2>
@@ -205,513 +125,658 @@
     <h2>🔑 Login Administrativo</h2>
     <input type="text" id="usuario" placeholder="Usuário" value="admin"><br><br>
     <input type="password" id="senha" placeholder="Senha" value="123"><br><br>
-    <button class="btn-primary" onclick="entrar()" style="width:100%; padding:16px;">Entrar</button>
+    <button class="btn-primary" onclick="entrar()" style="width:100%;padding:16px;">Entrar</button>
   </div>
 
   <!-- DASHBOARD -->
   <div id="painel" style="display:none;">
     <h2>Dashboard</h2>
-    <div style="margin: 20px 0;">
-      <button class="btn-primary" onclick="abrirPedidos()">📋 Todos os Pedidos</button>
-      <button class="btn-primary" onclick="abrirCancelados()">❌ Pedidos Cancelados</button>
-      <button class="btn-primary" onclick="abrirProdutos()">📦 Gerenciar Produtos</button>
+    <div style="margin:20px 0; display:flex; flex-wrap:wrap; gap:8px;">
+      <button class="btn-primary" onclick="abrirPedidos()">📋 Pedidos Ativos</button>
+      <button class="btn-primary" onclick="abrirCancelados()">❌ Cancelados</button>
+      <button class="btn-primary" onclick="abrirProdutos()">📦 Produtos</button>
+      <button class="btn-yellow" onclick="abrirPromocoes()">🏷️ Promoções</button>
+      <button class="btn-green"  onclick="abrirRelatorios()">📊 Relatórios</button>
       <button class="btn-primary" onclick="abrirConfiguracoes()">⚙️ Configurações</button>
     </div>
     <div style="display:flex; gap:20px; flex-wrap:wrap;">
-      <div class="card" style="flex:1; text-align:center;">
+      <div class="card" style="flex:1;text-align:center;">
         <h3>Total de Pedidos</h3>
-        <h1 id="total-pedidos" style="color:var(--accent); font-size:42px;">0</h1>
+        <h1 id="total-pedidos" style="color:var(--accent);font-size:42px;">0</h1>
       </div>
-      <div class="card" style="flex:1; text-align:center;">
+      <div class="card" style="flex:1;text-align:center;">
         <h3>Valor Total</h3>
-        <h1 id="valor-total" style="color:var(--green); font-size:42px;">R$ 0,00</h1>
+        <h1 id="valor-total" style="color:var(--green);font-size:42px;">R$ 0,00</h1>
       </div>
     </div>
   </div>
 
-  <!-- TODOS OS PEDIDOS -->
+  <!-- PEDIDOS ATIVOS (Kanban sem Entregue/Cancelado) -->
   <div id="pedidos-section" style="display:none;">
     <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
-    <h2>📋 Todos os Pedidos</h2>
+    <h2 style="margin:10px 0 20px;">📋 Pedidos Ativos</h2>
     <div id="pedidos-kanban" class="kanban"></div>
   </div>
 
-  <!-- PEDIDOS CANCELADOS -->
+  <!-- CANCELADOS -->
   <div id="cancelados-section" style="display:none;">
     <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
-    <h2>❌ Pedidos Cancelados</h2>
+    <h2 style="margin:10px 0 20px;">❌ Pedidos Cancelados</h2>
     <div id="cancelados"></div>
   </div>
 
-  <!-- GERENCIAR PRODUTOS -->
+  <!-- PRODUTOS -->
   <div id="produtos-section" style="display:none;">
     <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
-    <h2>📦 Gerenciar Produtos</h2>
+    <h2 style="margin:10px 0 20px;">📦 Gerenciar Produtos</h2>
     <button class="btn-primary" onclick="novoProduto()">+ Novo Produto</button>
     <div id="listaProdutos"></div>
+  </div>
+
+  <!-- PROMOÇÕES -->
+  <div id="promocoes-section" style="display:none;">
+    <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
+    <h2 style="margin:10px 0 20px;">🏷️ Gerenciar Promoções</h2>
+    <p style="color:#aaa; margin-bottom:20px;">
+      Defina um preço promocional para cada produto. Deixe em branco para desativar.
+    </p>
+    <div id="listaPromocoes" class="promo-grid"></div>
+  </div>
+
+  <!-- RELATÓRIOS -->
+  <div id="relatorios-section" style="display:none;">
+    <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
+    <h2 style="margin:10px 0 20px;">📊 Relatórios de Pedidos</h2>
+
+    <div class="filtros">
+      <input type="date" id="filtroDataInicio" placeholder="Data início">
+      <input type="date" id="filtroDataFim" placeholder="Data fim">
+      <select id="filtroStatus">
+        <option value="">Todos os status</option>
+        <option>Pendente</option>
+        <option>Em preparo</option>
+        <option>Saiu para entrega</option>
+        <option>Entregue</option>
+        <option>Cancelado</option>
+      </select>
+      <input type="text" id="filtroBusca" placeholder="🔍 Buscar cliente, item...">
+      <button class="btn-primary" onclick="aplicarFiltros()">Filtrar</button>
+      <button class="btn-back" onclick="limparFiltros()">Limpar</button>
+    </div>
+
+    <div class="resumo-cards">
+      <div class="resumo-card">
+        <h4>Total Pedidos</h4>
+        <span id="r-total" style="color:var(--accent);">0</span>
+      </div>
+      <div class="resumo-card">
+        <h4>Faturamento</h4>
+        <span id="r-faturamento" style="color:var(--green);">R$ 0</span>
+      </div>
+      <div class="resumo-card">
+        <h4>Entregues</h4>
+        <span id="r-entregues" style="color:var(--green);">0</span>
+      </div>
+      <div class="resumo-card">
+        <h4>Cancelados</h4>
+        <span id="r-cancelados" style="color:var(--red);">0</span>
+      </div>
+      <div class="resumo-card">
+        <h4>Ticket Médio</h4>
+        <span id="r-ticket" style="color:var(--yellow);">R$ 0</span>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table class="relatorio-table">
+        <thead>
+          <tr>
+            <th>#ID</th>
+            <th>Data</th>
+            <th>Cliente</th>
+            <th>Telefone</th>
+            <th>Itens</th>
+            <th>Total</th>
+            <th>Pagamento</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="relatorio-body"></tbody>
+      </table>
+    </div>
+    <p id="relatorio-vazio" style="text-align:center;color:#aaa;margin-top:30px;display:none;">
+      Nenhum pedido encontrado com esses filtros.
+    </p>
   </div>
 
   <!-- CONFIGURAÇÕES -->
   <div id="config-section" style="display:none;">
     <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
     <h2 style="margin-bottom:20px;">⚙️ Configurações da Loja</h2>
-
     <div class="card">
       <h3>🎨 Personalização</h3>
       <input type="text" id="nomeLoja" placeholder="Nome da Loja">
       <label>Cor principal</label>
-      <input type="color" id="corSistema" value="#00d4ff" style="width:100%; height:60px;">
+      <input type="color" id="corSistema" value="#00d4ff" style="height:60px;">
       <input type="text" id="logoLoja" placeholder="URL da Logo">
-      <button class="btn-primary" onclick="salvarConfiguracoes()" style="width:100%; margin-top:15px;">
-        💾 Salvar Configurações
-      </button>
+      <button class="btn-primary" onclick="salvarConfiguracoes()" style="width:100%;margin-top:15px;">💾 Salvar Configurações</button>
     </div>
-
     <div class="card">
       <h3>🚚 Delivery</h3>
       <input type="text" id="taxaEntrega" placeholder="Taxa de entrega">
       <input type="text" id="tempoEntrega" placeholder="Tempo médio">
       <input type="text" id="pedidoMinimo" placeholder="Pedido mínimo">
     </div>
-
     <div class="card">
       <h3>📱 WhatsApp</h3>
       <input type="text" id="whatsappLoja" placeholder="WhatsApp">
       <textarea id="mensagemAuto" placeholder="Mensagem automática" style="min-height:120px;"></textarea>
     </div>
-
     <div class="card">
       <h3>🟢 Status da Loja</h3>
-      <button id="btnLoja" class="btn-primary" onclick="toggleLoja()" style="width:100%; padding:18px; font-size:18px;">
-        🟢 Loja Aberta
-      </button>
+      <button id="btnLoja" class="btn-primary" onclick="toggleLoja()" style="width:100%;padding:18px;font-size:18px;">🟢 Loja Aberta</button>
     </div>
   </div>
 
 </div>
 
-<!-- MODAL PARA PRODUTOS -->
+<!-- MODAL PRODUTO -->
 <div id="modalProduto" class="modal">
   <div class="modal-content">
     <h3 id="modalTitulo">Novo Produto</h3>
-    <input type="text" id="prodNome" placeholder="Nome do produto" required>
-    <input type="number" id="prodPreco" placeholder="Preço (ex: 29.90)" step="0.01" required>
-    <input type="text" id="prodCategoria" placeholder="Categoria (ex: Lanches, Bebidas)">
-    <input type="text" id="prodImagem" placeholder="URL da Imagem">
-
-    <div style="margin-top:20px; display:flex; gap:10px;">
+    <input type="text"   id="prodNome"      placeholder="Nome do produto">
+    <input type="number" id="prodPreco"     placeholder="Preço (ex: 29.90)" step="0.01">
+    <input type="text"   id="prodCategoria" placeholder="Categoria">
+    <input type="text"   id="prodImagem"    placeholder="URL da Imagem">
+    <div style="margin-top:20px;display:flex;gap:10px;">
       <button class="btn-primary" onclick="salvarModal()" style="flex:1;">Salvar</button>
-      <button class="btn-back" onclick="fecharModal()" style="flex:1;">Cancelar</button>
+      <button class="btn-back"    onclick="fecharModal()" style="flex:1;">Cancelar</button>
     </div>
   </div>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxJrnbC_4yVaXtetK_4Eo1IYJ-Y6CWWCWc7J_QKaW58pA1lwRKXedDIT-1hk0YmLjaUqA/exec";
+const API = "https://script.google.com/macros/s/AKfycbxWZ-yKOMDdnIZBJNqCy2Lrg7MVTX0tSsz6ewHxXF58VwnjWLXbN-aQY2XkPxdp7167Ig/exec";
 
 let produtoEditando = null;
+let todosPedidosCache = [];
+let todosProdutosCache = [];
 
 // ==================== LOADING ====================
-function mostrarLoading() {
-  document.getElementById("loading").style.display = "flex";
-}
-
-function esconderLoading() {
-  document.getElementById("loading").style.display = "none";
-}
+function mostrarLoading(){ document.getElementById("loading").style.display="flex"; }
+function esconderLoading(){ document.getElementById("loading").style.display="none"; }
 
 // ==================== REQUISIÇÃO ====================
-async function fazerRequisicao(dados) {
+async function fazerRequisicao(dados){
   try {
-    await fetch(API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    await fetch(API,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
       body: JSON.stringify(dados),
-      mode: "no-cors"
+      mode:"no-cors"
     });
-    return { success: true };
-  } catch (e) {
-    console.error("Erro na requisição:", e);
-    return { success: false };
+    return {success:true};
+  } catch(e){
+    console.error(e);
+    return {success:false};
   }
 }
 
 // ==================== LOGIN ====================
-function entrar() {
-  const usuario = document.getElementById("usuario").value;
-  const senha = document.getElementById("senha").value;
-  if (usuario === "admin" && senha === "123") {
-    localStorage.setItem("adminLogado", "sim");
+function entrar(){
+  const u = document.getElementById("usuario").value;
+  const s = document.getElementById("senha").value;
+  if(u==="admin"&&s==="123"){
+    localStorage.setItem("adminLogado","sim");
     mostrarPainel();
-  } else {
-    alert("Login inválido!");
-  }
+  } else { alert("Login inválido!"); }
 }
 
-function mostrarPainel() {
-  document.getElementById("login").style.display = "none";
-  document.getElementById("painel").style.display = "block";
+function mostrarPainel(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("painel").style.display="block";
   carregarDashboard();
 }
 
-function logout() {
+function logout(){
   localStorage.removeItem("adminLogado");
   location.reload();
 }
 
-function voltarParaMenu() {
-  document.getElementById("painel").style.display = "block";
-  document.getElementById("pedidos-section").style.display = "none";
-  document.getElementById("cancelados-section").style.display = "none";
-  document.getElementById("produtos-section").style.display = "none";
-  document.getElementById("config-section").style.display = "none";
+function ocultarTodas(){
+  ["painel","pedidos-section","cancelados-section","produtos-section",
+   "promocoes-section","relatorios-section","config-section"].forEach(id=>{
+    document.getElementById(id).style.display="none";
+  });
 }
 
-function abrirPedidos() {
-  document.getElementById("painel").style.display = "none";
-  document.getElementById("pedidos-section").style.display = "block";
-  carregarPedidos();
+function voltarParaMenu(){
+  ocultarTodas();
+  document.getElementById("painel").style.display="block";
 }
 
-function abrirCancelados() {
-  document.getElementById("painel").style.display = "none";
-  document.getElementById("cancelados-section").style.display = "block";
-  carregarCancelados();
-}
-
-function abrirProdutos() {
-  document.getElementById("painel").style.display = "none";
-  document.getElementById("produtos-section").style.display = "block";
-  carregarProdutos();
-}
-
-function abrirConfiguracoes() {
-  document.getElementById("painel").style.display = "none";
-  document.getElementById("pedidos-section").style.display = "none";
-  document.getElementById("cancelados-section").style.display = "none";
-  document.getElementById("produtos-section").style.display = "none";
-  document.getElementById("config-section").style.display = "block";
-  carregarConfiguracoes();
-}
+function abrirPedidos()    { ocultarTodas(); document.getElementById("pedidos-section").style.display="block";   carregarPedidos(); }
+function abrirCancelados() { ocultarTodas(); document.getElementById("cancelados-section").style.display="block"; carregarCancelados(); }
+function abrirProdutos()   { ocultarTodas(); document.getElementById("produtos-section").style.display="block";  carregarProdutos(); }
+function abrirPromocoes()  { ocultarTodas(); document.getElementById("promocoes-section").style.display="block"; carregarPromocoes(); }
+function abrirRelatorios() { ocultarTodas(); document.getElementById("relatorios-section").style.display="block"; carregarRelatorios(); }
+function abrirConfiguracoes(){ ocultarTodas(); document.getElementById("config-section").style.display="block"; carregarConfiguracoes(); }
 
 // ==================== DASHBOARD ====================
-async function carregarDashboard() {
+async function carregarDashboard(){
   mostrarLoading();
   try {
-    const res = await fetch(API + "?pedidos=1");
+    const res = await fetch(API+"?pedidos=1");
     const pedidos = await res.json();
     const total = pedidos.length;
-    const valor = pedidos.reduce((s, p) => s + parseFloat(p.total || 0), 0);
+    const valor = pedidos.reduce((s,p)=>s+parseFloat(p.total||0),0);
     document.getElementById("total-pedidos").textContent = total;
-    document.getElementById("valor-total").textContent = "R$ " + valor.toFixed(2);
-  } catch (e) {
-    console.log(e);
-  } finally {
-    esconderLoading();
-  }
+    document.getElementById("valor-total").textContent = "R$ "+valor.toFixed(2).replace(".",",");
+  } catch(e){ console.log(e); }
+  finally { esconderLoading(); }
 }
 
-// ==================== PEDIDOS (KANBAN) ====================
-async function carregarPedidos() {
+// ==================== KANBAN (sem Entregue / Cancelado) ====================
+async function carregarPedidos(){
   mostrarLoading();
   try {
-    const res = await fetch(API + "?pedidos=1");
+    const res = await fetch(API+"?pedidos=1");
     const pedidos = await res.json();
     pedidos.reverse();
 
+    // Apenas status ativos no Kanban
     const statusLista = [
-      { nome: "Pendente", cor: "#ff9800" },
-      { nome: "Em preparo", cor: "#00d4ff" },
-      { nome: "Saiu para entrega", cor: "#9c27b0" },
-      { nome: "Entregue", cor: "#00ff9d" },
-      { nome: "Cancelado", cor: "#ff3b5c" }
+      {nome:"Pendente",       cor:"#ff9800"},
+      {nome:"Em preparo",     cor:"#00d4ff"},
+      {nome:"Saiu para entrega", cor:"#9c27b0"},
     ];
 
     let html = "";
 
-    statusLista.forEach(statusColuna => {
-      const pedidosFiltrados = pedidos.filter(p => p.status === statusColuna.nome);
-
+    statusLista.forEach(col => {
+      const filtrados = pedidos.filter(p=>p.status===col.nome);
       html += `
-        <div class="kanban-coluna" style="border-top:5px solid ${statusColuna.cor};">
-          <h2 class="kanban-titulo" style="color:${statusColuna.cor};">
-            ${statusColuna.nome} (${pedidosFiltrados.length})
-          </h2>`;
+        <div class="kanban-coluna" style="border-top:5px solid ${col.cor};">
+          <h2 class="kanban-titulo" style="color:${col.cor};">${col.nome} (${filtrados.length})</h2>`;
 
-      if (pedidosFiltrados.length === 0) {
-        html += `<p style="opacity:.6; text-align:center; margin-top:40px;">Nenhum pedido</p>`;
-      }
+      if(!filtrados.length)
+        html += `<p style="opacity:.6;text-align:center;margin-top:40px;">Nenhum pedido</p>`;
 
-      pedidosFiltrados.forEach(p => {
-        html += `
-          <div class="pedido-card">
-            <div class="pedido-info">
-              <strong style="color:var(--accent)">#${p.idPedido}</strong> 
-              <span class="pedido-data">${p.data || p.dataHora || p.timestamp || 'Sem data'}</span><br><br>
-              
-              👤 ${p.cliente}<br>
-              📞 ${p.telefone}<br><br>
-              📍 ${p.endereco}
-
-<br>
-
-<button
-  onclick="abrirMapa('${encodeURIComponent(p.endereco)}')"
-  style="
-    margin-top:8px;
-    width:100%;
-    background:#34a853;
-    color:white;
-    border:none;
-    padding:10px;
-    border-radius:8px;
-    cursor:pointer;
-  "
->
-  📍 Abrir no Maps
-</button>
-
-<br><br>
-              🍔 ${p.itens}<br>
-              
-              <div class="pedido-total">R$ ${parseFloat(p.total || 0).toFixed(2)}</div>
-            </div>
-            
-            <select id="status-${p.idPedido}" class="status-select">
-              <option value="Pendente" ${p.status === "Pendente" ? "selected" : ""}>Pendente</option>
-              <option value="Em preparo" ${p.status === "Em preparo" ? "selected" : ""}>Em preparo</option>
-              <option value="Saiu para entrega" ${p.status === "Saiu para entrega" ? "selected" : ""}>Saiu para entrega</option>
-              <option value="Entregue" ${p.status === "Entregue" ? "selected" : ""}>Entregue</option>
-              <option value="Cancelado" ${p.status === "Cancelado" ? "selected" : ""}>Cancelado</option>
-            </select>
-            <button class="btn-primary btn-status" onclick="alterarStatus('${p.idPedido}')">Atualizar Status</button>
-          </div>`;
-      });
-
+      filtrados.forEach(p => { html += cartaoPedido(p); });
       html += `</div>`;
     });
 
     document.getElementById("pedidos-kanban").innerHTML = html;
-  } catch (e) {
-    console.log(e);
-    document.getElementById("pedidos-kanban").innerHTML = "<p>Erro ao carregar pedidos.</p>";
-  } finally {
-    esconderLoading();
-  }
+  } catch(e){
+    document.getElementById("pedidos-kanban").innerHTML="<p>Erro ao carregar pedidos.</p>";
+  } finally { esconderLoading(); }
+}
+
+function cartaoPedido(p){
+  return `
+    <div class="pedido-card">
+      <div class="pedido-info">
+        <strong style="color:var(--accent)">#${p.idPedido}</strong>
+        <span class="pedido-data">${p.data||p.dataHora||p.timestamp||'Sem data'}</span><br><br>
+        👤 ${p.cliente}<br>
+        📞 ${p.telefone}<br><br>
+        📍 ${p.endereco}
+        <button onclick="abrirMapa('${encodeURIComponent(p.endereco)}')"
+          style="margin-top:8px;width:100%;background:#34a853;color:white;border:none;
+                 padding:10px;border-radius:8px;cursor:pointer;">
+          📍 Abrir no Maps
+        </button><br><br>
+        🍔 ${p.itens}
+        <div class="pedido-total">R$ ${parseFloat(p.total||0).toFixed(2).replace(".",",")}</div>
+      </div>
+      <select id="status-${p.idPedido}" class="status-select">
+        <option value="Pendente"            ${p.status==="Pendente"?"selected":""}>Pendente</option>
+        <option value="Em preparo"          ${p.status==="Em preparo"?"selected":""}>Em preparo</option>
+        <option value="Saiu para entrega"   ${p.status==="Saiu para entrega"?"selected":""}>Saiu para entrega</option>
+        <option value="Entregue"            ${p.status==="Entregue"?"selected":""}>Entregue ✅</option>
+        <option value="Cancelado"           ${p.status==="Cancelado"?"selected":""}>Cancelado ❌</option>
+      </select>
+      <button class="btn-primary btn-status" onclick="alterarStatus('${p.idPedido}')">Atualizar Status</button>
+    </div>`;
 }
 
 // ==================== CANCELADOS ====================
-async function carregarCancelados() {
+async function carregarCancelados(){
   mostrarLoading();
   try {
-    const res = await fetch(API + "?pedidos=1");
+    const res = await fetch(API+"?pedidos=1");
     const pedidos = await res.json();
-    const cancelados = pedidos.filter(p => p.status === "Cancelado");
+    const cancelados = pedidos.filter(p=>p.status==="Cancelado");
 
     let html = "";
-    cancelados.forEach(p => {
+    cancelados.reverse().forEach(p=>{
       html += `
-        <div class="card" style="border-left: 5px solid var(--red);">
-          <strong style="color:var(--red)">Pedido #${p.idPedido}</strong> 
-          <small style="color:#aaa;">${p.data || p.dataHora || ''}</small><br><br>
-          👤 ${p.cliente}<br>
-          📞 ${p.telefone}<br><br>
-          💰 R$ ${parseFloat(p.total || 0).toFixed(2)}
-        </div>`;
-    });
-
-    document.getElementById("cancelados").innerHTML = html || "<p>Nenhum pedido cancelado.</p>";
-  } catch (e) {
-    document.getElementById("cancelados").innerHTML = "<p>Erro ao carregar.</p>";
-  } finally {
-    esconderLoading();
-  }
-}
-
-// ==================== PRODUTOS ====================
-async function carregarProdutos() {
-  mostrarLoading();
-  try {
-    const res = await fetch(API + "?produtos=1");
-    const produtos = await res.json();
-
-    let html = `<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px;">`;
-
-    produtos.forEach(p => {
-      html += `
-        <div class="card" style="text-align:center;">
-          <img src="${p.imagem || 'https://placehold.co/600x400'}" 
-               style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
-          <h3 style="margin:12px 0 8px;">${p.nome}</h3>
-          <h2 style="color:var(--green);">R$ ${parseFloat(p.preco).toFixed(2)}</h2>
-          <p>${p.categoria || ""}</p>
-          <div style="margin-top:12px;">
-            <button class="btn-primary" onclick="editarProduto('${p.id}')">✏️ Editar</button>
-            <button class="btn-danger" onclick="excluirProduto('${p.id}')">🗑 Excluir</button>
+        <div class="card" style="border-left:5px solid var(--red);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+            <div>
+              <strong style="color:var(--red)">Pedido #${p.idPedido}</strong>
+              <small style="color:#aaa;margin-left:10px;">${p.data||p.dataHora||''}</small><br><br>
+              👤 ${p.cliente} &nbsp;|&nbsp; 📞 ${p.telefone}<br>
+              🍔 ${p.itens}<br>
+              💰 <strong style="color:var(--green)">R$ ${parseFloat(p.total||0).toFixed(2).replace(".",",")}</strong>
+            </div>
+            <div>
+              <select id="rev-status-${p.idPedido}" style="padding:8px;background:#2a2a32;border:none;border-radius:8px;color:white;margin-bottom:8px;">
+                <option value="Pendente">Pendente</option>
+                <option value="Em preparo">Em preparo</option>
+              </select><br>
+              <button class="btn-yellow" onclick="reverterStatus('${p.idPedido}')">🔄 Recolocar na Fila</button>
+            </div>
           </div>
         </div>`;
     });
 
+    document.getElementById("cancelados").innerHTML = html || "<p style='color:#aaa;'>Nenhum pedido cancelado.</p>";
+  } catch(e){
+    document.getElementById("cancelados").innerHTML="<p>Erro ao carregar.</p>";
+  } finally { esconderLoading(); }
+}
+
+async function reverterStatus(idPedido){
+  const novoStatus = document.getElementById(`rev-status-${idPedido}`).value;
+  if(!confirm(`Recolocar pedido #${idPedido} como "${novoStatus}"?`)) return;
+
+  const res = await fazerRequisicao({acao:"alterarStatus", idPedido, status:novoStatus});
+  if(res.success){
+    alert("✅ Pedido recolocado na fila!");
+    carregarCancelados();
+    carregarDashboard();
+  } else { alert("❌ Erro ao reverter status"); }
+}
+
+// ==================== PRODUTOS ====================
+async function carregarProdutos(){
+  mostrarLoading();
+  try {
+    const res = await fetch(API+"?produtos=1");
+    todosProdutosCache = await res.json();
+
+    let html = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:20px;">`;
+    todosProdutosCache.forEach(p=>{
+      const emPromocao = p.promocao && parseFloat(p.promocao)>0;
+      html += `
+        <div class="card" style="text-align:center;">
+          <img src="${p.imagem||'[placehold.co](https://placehold.co/600x400)'}"
+               style="width:100%;height:180px;object-fit:cover;border-radius:12px;">
+          <h3 style="margin:12px 0 4px;">${p.nome}</h3>
+          <h2 style="color:var(--green);">R$ ${parseFloat(p.preco).toFixed(2).replace(".",",")}</h2>
+          ${emPromocao?`<span class="promo-badge">🏷️ Promo: R$ ${parseFloat(p.promocao).toFixed(2).replace(".",",")}</span>`:''}
+          <p style="color:#aaa;font-size:13px;">${p.categoria||""}</p>
+          <div style="margin-top:12px;">
+            <button class="btn-primary" onclick="editarProduto('${p.id}')">✏️ Editar</button>
+            <button class="btn-danger"  onclick="excluirProduto('${p.id}')">🗑 Excluir</button>
+          </div>
+        </div>`;
+    });
     html += `</div>`;
-    document.getElementById("listaProdutos").innerHTML = html || "<p>Nenhum produto cadastrado.</p>";
-  } catch (e) {
-    document.getElementById("listaProdutos").innerHTML = "<p>Erro ao carregar produtos.</p>";
-  } finally {
-    esconderLoading();
+    document.getElementById("listaProdutos").innerHTML = html;
+  } catch(e){
+    document.getElementById("listaProdutos").innerHTML="<p>Erro ao carregar produtos.</p>";
+  } finally { esconderLoading(); }
+}
+
+// ==================== PROMOÇÕES ====================
+async function carregarPromocoes(){
+  mostrarLoading();
+  try {
+    const res = await fetch(API+"?produtos=1");
+    todosProdutosCache = await res.json();
+
+    let html = "";
+    todosProdutosCache.forEach(p=>{
+      const promoAtual = p.promocao && parseFloat(p.promocao)>0 ? parseFloat(p.promocao).toFixed(2) : "";
+      html += `
+        <div class="promo-card">
+          <img src="${p.imagem||'[placehold.co](https://placehold.co/600x400)'}" alt="">
+          <div class="promo-info">
+            <h3>${p.nome}</h3>
+            <p style="color:#aaa;font-size:13px;">${p.categoria||""}</p>
+            <p>Preço original: <strong style="color:var(--green);">R$ ${parseFloat(p.preco).toFixed(2).replace(".",",")}</strong></p>
+            <div class="promo-inputs">
+              <input type="number" id="promo-${p.id}" placeholder="Preço promo" step="0.01"
+                     value="${promoAtual}" style="margin:0;">
+              <button class="btn-yellow" onclick="salvarPromocao('${p.id}')">💾</button>
+              ${promoAtual?`<button class="btn-danger" onclick="removerPromocao('${p.id}')">✕</button>`:''}
+            </div>
+            ${promoAtual?`<p style="margin-top:8px;"><span class="promo-badge">🏷️ Em promoção: R$ ${promoAtual}</span></p>`:'<p style="color:#666;font-size:12px;margin-top:8px;">Sem promoção ativa</p>'}
+          </div>
+        </div>`;
+    });
+
+    document.getElementById("listaPromocoes").innerHTML = html || "<p>Nenhum produto cadastrado.</p>";
+  } catch(e){
+    document.getElementById("listaPromocoes").innerHTML="<p>Erro ao carregar.</p>";
+  } finally { esconderLoading(); }
+}
+
+async function salvarPromocao(id){
+  const val = document.getElementById(`promo-${id}`).value;
+  const preco = parseFloat(val);
+  if(isNaN(preco)||preco<=0){ alert("Digite um preço promocional válido."); return; }
+
+  const res = await fazerRequisicao({acao:"salvarPromocao", id, promocao: preco});
+  if(res.success){ alert("✅ Promoção salva!"); carregarPromocoes(); }
+  else { alert("❌ Erro ao salvar promoção"); }
+}
+
+async function removerPromocao(id){
+  if(!confirm("Remover promoção deste produto?")) return;
+  const res = await fazerRequisicao({acao:"salvarPromocao", id, promocao:0});
+  if(res.success){ alert("✅ Promoção removida!"); carregarPromocoes(); }
+  else { alert("❌ Erro ao remover promoção"); }
+}
+
+// ==================== RELATÓRIOS ====================
+async function carregarRelatorios(){
+  mostrarLoading();
+  try {
+    const res = await fetch(API+"?pedidos=1");
+    todosPedidosCache = await res.json();
+    renderizarRelatorio(todosPedidosCache);
+  } catch(e){ console.log(e); }
+  finally { esconderLoading(); }
+}
+
+function aplicarFiltros(){
+  let dados = [...todosPedidosCache];
+
+  const inicio  = document.getElementById("filtroDataInicio").value;
+  const fim     = document.getElementById("filtroDataFim").value;
+  const status  = document.getElementById("filtroStatus").value;
+  const busca   = document.getElementById("filtroBusca").value.toLowerCase();
+
+  if(inicio){
+    dados = dados.filter(p=>{
+      const d = parsearData(p.data||p.dataHora||"");
+      return d && d >= new Date(inicio+"T00:00:00");
+    });
   }
+  if(fim){
+    dados = dados.filter(p=>{
+      const d = parsearData(p.data||p.dataHora||"");
+      return d && d <= new Date(fim+"T23:59:59");
+    });
+  }
+  if(status) dados = dados.filter(p=>p.status===status);
+  if(busca)  dados = dados.filter(p=>
+    (p.cliente||"").toLowerCase().includes(busca)||
+    (p.itens||"").toLowerCase().includes(busca)||
+    (p.telefone||"").includes(busca)||
+    String(p.idPedido).includes(busca)
+  );
+
+  renderizarRelatorio(dados);
+}
+
+function limparFiltros(){
+  document.getElementById("filtroDataInicio").value="";
+  document.getElementById("filtroDataFim").value="";
+  document.getElementById("filtroStatus").value="";
+  document.getElementById("filtroBusca").value="";
+  renderizarRelatorio(todosPedidosCache);
+}
+
+function parsearData(str){
+  if(!str) return null;
+  // Tenta ISO ou DD/MM/YYYY HH:MM:SS
+  let d = new Date(str);
+  if(!isNaN(d)) return d;
+  const partes = str.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if(partes) return new Date(`${partes[3]}-${partes[2]}-${partes[1]}`);
+  return null;
+}
+
+const corStatus = {
+  "Pendente":           "#ff9800",
+  "Em preparo":         "#00d4ff",
+  "Saiu para entrega":  "#9c27b0",
+  "Entregue":           "#00ff9d",
+  "Cancelado":          "#ff3b5c"
+};
+
+function renderizarRelatorio(dados){
+  dados = [...dados].reverse();
+
+  const total       = dados.length;
+  const faturamento = dados.reduce((s,p)=>s+parseFloat(p.total||0),0);
+  const entregues   = dados.filter(p=>p.status==="Entregue").length;
+  const cancelados  = dados.filter(p=>p.status==="Cancelado").length;
+  const ticket      = total>0 ? faturamento/total : 0;
+
+  document.getElementById("r-total").textContent       = total;
+  document.getElementById("r-faturamento").textContent = "R$ "+faturamento.toFixed(2).replace(".",",");
+  document.getElementById("r-entregues").textContent   = entregues;
+  document.getElementById("r-cancelados").textContent  = cancelados;
+  document.getElementById("r-ticket").textContent      = "R$ "+ticket.toFixed(2).replace(".",",");
+
+  const corpo = document.getElementById("relatorio-body");
+  const vazio = document.getElementById("relatorio-vazio");
+
+  if(!dados.length){
+    corpo.innerHTML="";
+    vazio.style.display="block";
+    return;
+  }
+  vazio.style.display="none";
+
+  corpo.innerHTML = dados.map(p=>{
+    const cor = corStatus[p.status]||"#aaa";
+    return `
+      <tr>
+        <td><strong style="color:var(--accent)">#${p.idPedido}</strong></td>
+        <td style="white-space:nowrap">${p.data||p.dataHora||'—'}</td>
+        <td>${p.cliente}</td>
+        <td>${p.telefone}</td>
+        <td style="max-width:220px;">${p.itens}</td>
+        <td style="white-space:nowrap"><strong style="color:var(--green)">R$ ${parseFloat(p.total||0).toFixed(2).replace(".",",")}</strong></td>
+        <td>${p.pagamento||'—'}</td>
+        <td><span class="badge" style="background:${cor}22;color:${cor};border:1px solid ${cor};">${p.status}</span></td>
+      </tr>`;
+  }).join("");
 }
 
 // ==================== MODAL PRODUTO ====================
-function novoProduto() {
-  produtoEditando = null;
-  document.getElementById("modalTitulo").textContent = "Novo Produto";
-  document.getElementById("prodNome").value = "";
-  document.getElementById("prodPreco").value = "";
-  document.getElementById("prodCategoria").value = "";
-  document.getElementById("prodImagem").value = "";
-  document.getElementById("modalProduto").style.display = "flex";
+function novoProduto(){
+  produtoEditando=null;
+  document.getElementById("modalTitulo").textContent="Novo Produto";
+  ["prodNome","prodPreco","prodCategoria","prodImagem"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("modalProduto").style.display="flex";
 }
 
-function editarProduto(id) {
-  produtoEditando = id;
-  document.getElementById("modalTitulo").textContent = "Editar Produto";
-  document.getElementById("modalProduto").style.display = "flex";
+function editarProduto(id){
+  produtoEditando=id;
+  const p = todosProdutosCache.find(x=>String(x.id)===String(id));
+  if(p){
+    document.getElementById("prodNome").value      = p.nome||"";
+    document.getElementById("prodPreco").value     = p.preco||"";
+    document.getElementById("prodCategoria").value = p.categoria||"";
+    document.getElementById("prodImagem").value    = p.imagem||"";
+  }
+  document.getElementById("modalTitulo").textContent="Editar Produto";
+  document.getElementById("modalProduto").style.display="flex";
 }
 
-function fecharModal() {
-  document.getElementById("modalProduto").style.display = "none";
-}
+function fecharModal(){ document.getElementById("modalProduto").style.display="none"; }
 
-async function salvarModal() {
-  const nome = document.getElementById("prodNome").value.trim();
-  const preco = document.getElementById("prodPreco").value;
+async function salvarModal(){
+  const nome      = document.getElementById("prodNome").value.trim();
+  const preco     = document.getElementById("prodPreco").value;
   const categoria = document.getElementById("prodCategoria").value.trim();
-  const imagem = document.getElementById("prodImagem").value.trim();
+  const imagem    = document.getElementById("prodImagem").value.trim();
+  if(!nome||!preco){ alert("Nome e Preço são obrigatórios!"); return; }
 
-  if (!nome || !preco) {
-    alert("Nome e Preço são obrigatórios!");
-    return;
-  }
-
-  const dados = {
-    acao: "salvarProduto",
-    id: produtoEditando,
-    nome: nome,
-    preco: preco,
-    categoria: categoria,
-    imagem: imagem || "https://placehold.co/600x400"
-  };
-
-  const resultado = await fazerRequisicao(dados);
-  if (resultado.success) {
-    alert("✅ Produto salvo com sucesso!");
-    fecharModal();
-    carregarProdutos();
-  } else {
-    alert("❌ Erro ao salvar produto");
-  }
+  const res = await fazerRequisicao({
+    acao:"salvarProduto", id:produtoEditando,
+    nome, preco, categoria,
+    imagem: imagem||"[placehold.co](https://placehold.co/600x400)"
+  });
+  if(res.success){ alert("✅ Produto salvo!"); fecharModal(); carregarProdutos(); }
+  else { alert("❌ Erro ao salvar produto"); }
 }
 
-async function excluirProduto(id) {
-  if (!confirm("Tem certeza que deseja excluir este produto?")) return;
-  
-  const resultado = await fazerRequisicao({ acao: "excluirProduto", id: id });
-  if (resultado.success) {
-    alert("🗑 Produto excluído!");
-    carregarProdutos();
-  } else {
-    alert("❌ Erro ao excluir produto");
-  }
+async function excluirProduto(id){
+  if(!confirm("Excluir este produto?")) return;
+  const res = await fazerRequisicao({acao:"excluirProduto", id});
+  if(res.success){ alert("🗑 Excluído!"); carregarProdutos(); }
+  else { alert("❌ Erro ao excluir"); }
 }
 
 // ==================== ALTERAR STATUS ====================
-async function alterarStatus(idPedido) {
+async function alterarStatus(idPedido){
   const novoStatus = document.getElementById(`status-${idPedido}`).value;
-
-  const resultado = await fazerRequisicao({
-    acao: "alterarStatus",
-    idPedido: idPedido,
-    status: novoStatus
-  });
-
-  if (resultado.success) {
+  const res = await fazerRequisicao({acao:"alterarStatus", idPedido, status:novoStatus});
+  if(res.success){
     alert("✅ Status atualizado!");
     carregarPedidos();
     carregarDashboard();
-  } else {
-    alert("❌ Erro ao atualizar status");
-  }
+  } else { alert("❌ Erro ao atualizar status"); }
+}
+
+// ==================== MAPA ====================
+function abrirMapa(endereco){
+  window.open(`[google.com](https://www.google.com/maps/search/?api=1&query=${endereco})`,"_blank");
 }
 
 // ==================== CONFIGURAÇÕES ====================
-function salvarConfiguracoes() {
-  localStorage.setItem("nomeLoja", document.getElementById("nomeLoja").value);
-  localStorage.setItem("corSistema", document.getElementById("corSistema").value);
-  localStorage.setItem("logoLoja", document.getElementById("logoLoja").value);
-  localStorage.setItem("taxaEntrega", document.getElementById("taxaEntrega").value);
-  localStorage.setItem("tempoEntrega", document.getElementById("tempoEntrega").value);
-  localStorage.setItem("pedidoMinimo", document.getElementById("pedidoMinimo").value);
-  localStorage.setItem("whatsappLoja", document.getElementById("whatsappLoja").value);
-  localStorage.setItem("mensagemAuto", document.getElementById("mensagemAuto").value);
-
+function salvarConfiguracoes(){
+  ["nomeLoja","corSistema","logoLoja","taxaEntrega","tempoEntrega","pedidoMinimo","whatsappLoja","mensagemAuto"]
+    .forEach(id=>localStorage.setItem(id, document.getElementById(id).value));
   aplicarConfiguracoes();
   alert("✅ Configurações salvas!");
 }
 
-function abrirMapa(endereco) {
-
-  const url =
-    `https://www.google.com/maps/search/?api=1&query=${endereco}`;
-
-  window.open(url, "_blank");
-
+function carregarConfiguracoes(){
+  ["nomeLoja","corSistema","logoLoja","taxaEntrega","tempoEntrega","pedidoMinimo","whatsappLoja","mensagemAuto"]
+    .forEach(id=>{ document.getElementById(id).value = localStorage.getItem(id)||""; });
+  if(!localStorage.getItem("corSistema")) document.getElementById("corSistema").value="#00d4ff";
 }
 
-function carregarConfiguracoes() {
-  document.getElementById("nomeLoja").value = localStorage.getItem("nomeLoja") || "";
-  document.getElementById("corSistema").value = localStorage.getItem("corSistema") || "#00d4ff";
-  document.getElementById("logoLoja").value = localStorage.getItem("logoLoja") || "";
-  document.getElementById("taxaEntrega").value = localStorage.getItem("taxaEntrega") || "";
-  document.getElementById("tempoEntrega").value = localStorage.getItem("tempoEntrega") || "";
-  document.getElementById("pedidoMinimo").value = localStorage.getItem("pedidoMinimo") || "";
-  document.getElementById("whatsappLoja").value = localStorage.getItem("whatsappLoja") || "";
-  document.getElementById("mensagemAuto").value = localStorage.getItem("mensagemAuto") || "";
-}
-
-function aplicarConfiguracoes() {
+function aplicarConfiguracoes(){
   const nome = localStorage.getItem("nomeLoja");
-  const cor = localStorage.getItem("corSistema");
-
-  if (nome) {
-    document.querySelector("header h2").innerHTML = `🔧 ${nome}`;
-  }
-  if (cor) {
-    document.documentElement.style.setProperty("--accent", cor);
-  }
+  const cor  = localStorage.getItem("corSistema");
+  if(nome) document.querySelector("header h2").innerHTML=`🔧 ${nome}`;
+  if(cor)  document.documentElement.style.setProperty("--accent", cor);
 }
 
-function toggleLoja() {
-  const status = localStorage.getItem("lojaFechada");
+function toggleLoja(){
+  const fechada = localStorage.getItem("lojaFechada");
   const btn = document.getElementById("btnLoja");
-
-  if (status === "sim") {
-    localStorage.setItem("lojaFechada", "nao");
-    btn.innerHTML = "🟢 Loja Aberta";
-    btn.style.background = "#00ff9d";
-    btn.style.color = "#000";
+  if(fechada==="sim"){
+    localStorage.setItem("lojaFechada","nao");
+    btn.innerHTML="🟢 Loja Aberta"; btn.style.background="#00ff9d"; btn.style.color="#000";
   } else {
-    localStorage.setItem("lojaFechada", "sim");
-    btn.innerHTML = "🔴 Loja Fechada";
-    btn.style.background = "#ff3b5c";
-    btn.style.color = "#fff";
+    localStorage.setItem("lojaFechada","sim");
+    btn.innerHTML="🔴 Loja Fechada"; btn.style.background="#ff3b5c"; btn.style.color="#fff";
   }
 }
 
 // Auto login
-if (localStorage.getItem("adminLogado")) {
-  mostrarPainel();
-}
-
+if(localStorage.getItem("adminLogado")) mostrarPainel();
 aplicarConfiguracoes();
 </script>
 </body>
