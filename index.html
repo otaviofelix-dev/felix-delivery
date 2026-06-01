@@ -1,785 +1,944 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Admin - Felix Delivery</title>
-  <style>
-    :root {
-      --bg: #0f0f12;
-      --card: #1a1a20;
-      --accent: #00d4ff;
-      --green: #00ff9d;
-      --red: #ff3b5c;
-      --yellow: #ffd600;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #e0e0e0; padding: 15px; }
-    .container { max-width: 1300px; margin: auto; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Felix Delivery — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0d;
+  --surface: #13131a;
+  --card: #1c1c26;
+  --border: #2a2a38;
+  --accent: #ff6b35;
+  --accent2: #00e5ff;
+  --green: #00e676;
+  --red: #ff1744;
+  --yellow: #ffd740;
+  --purple: #b388ff;
+  --text: #e8e8f0;
+  --muted: #6b6b80;
+  --font-d: 'Syne', sans-serif;
+  --font-m: 'Space Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-d);background:var(--bg);color:var(--text);min-height:100vh;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 
-    header {
-      background: linear-gradient(135deg, #1a1a20, #25252e);
-      padding: 18px 25px; border-radius: 16px; margin-bottom: 25px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
+#loading{position:fixed;inset:0;background:rgba(10,10,13,.9);display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(8px);}
+.spin{width:46px;height:46px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-    .card { background: var(--card); border-radius: 16px; padding: 20px; margin: 15px 0; border: 1px solid #2a2a32; }
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-size:19px;font-weight:800;letter-spacing:-.5px;}
+.logo span{color:var(--accent);}
+.store-badge{display:flex;align-items:center;gap:8px;font-size:12px;font-family:var(--font-m);}
+.store-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:pulse 2s infinite;}
+.store-dot.closed{background:var(--red);box-shadow:0 0 7px var(--red);animation:none;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-    button { padding: 12px 22px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; margin: 6px 8px 6px 0; }
-    .btn-primary { background: var(--accent); color: #000; }
-    .btn-danger  { background: var(--red); color: white; }
-    .btn-back    { background: #333; color: white; }
-    .btn-yellow  { background: var(--yellow); color: #000; }
-    .btn-green   { background: var(--green); color: #000; }
+.layout{display:flex;height:calc(100vh - 60px);}
+.sidebar{width:210px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 10px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted);transition:all .2s;border:1px solid transparent;}
+.nav-item:hover{color:var(--text);background:var(--card);}
+.nav-item.active{color:var(--accent);background:rgba(255,107,53,.08);border-color:rgba(255,107,53,.18);}
+.nav-icon{font-size:16px;}
+.nav-div{height:1px;background:var(--border);margin:6px 0;}
 
-    /* LOADING */
-    .loading-overlay {
-      position: fixed; top:0; left:0; width:100%; height:100%;
-      background: rgba(15,15,18,0.85); display:none;
-      align-items:center; justify-content:center; z-index:9999; backdrop-filter:blur(4px);
-    }
-    .spinner {
-      width:70px; height:70px; border:6px solid #2a2a32;
-      border-top:6px solid var(--accent); border-radius:50%;
-      animation: girar 0.8s linear infinite;
-    }
-    @keyframes girar { 100%{ transform:rotate(360deg); } }
+main{flex:1;overflow-y:auto;padding:24px;}
+.section{display:none;animation:fadeIn .25s;}
+.section.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-    /* KANBAN */
-    .kanban { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:14px; align-items:start; }
-    .kanban-coluna { background:#16161d; border-radius:18px; padding:12px; min-height:300px; }
-    .kanban-titulo { font-size:17px; font-weight:bold; margin-bottom:12px; text-align:center; }
-    .pedido-card {
-      background:#1f1f28; border-radius:12px; padding:12px; margin-bottom:10px;
-      border:1px solid #2a2a32; transition:.2s; font-size:13.5px;
-    }
-    .pedido-card:hover { transform:translateY(-2px); border-color:var(--accent); }
-    .pedido-info { line-height:1.6; }
-    .pedido-data { font-size:12px; color:#aaa; margin-bottom:8px; }
-    .pedido-total { color:var(--green); font-size:18px; font-weight:bold; margin-top:8px; }
-    .status-select {
-      width:100%; padding:8px; border-radius:8px; background:#2a2a32;
-      color:white; border:none; margin:8px 0 6px; font-size:13px;
-    }
-    .btn-status { width:100%; padding:10px; font-size:13px; }
+.pg-head{margin-bottom:24px;}
+.pg-head h1{font-size:26px;font-weight:800;}
+.pg-head p{color:var(--muted);font-size:13px;margin-top:3px;}
 
-    /* RELATÓRIO */
-    .filtros { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
-    .filtros input, .filtros select {
-      flex:1; min-width:160px; padding:10px; background:#2a2a32;
-      border:none; border-radius:10px; color:white; font-size:14px;
-    }
-    .relatorio-table { width:100%; border-collapse:collapse; font-size:13.5px; }
-    .relatorio-table th { background:#25252e; padding:12px 10px; text-align:left; color:var(--accent); }
-    .relatorio-table td { padding:10px; border-bottom:1px solid #2a2a32; vertical-align:top; }
-    .relatorio-table tr:hover td { background:#1f1f28; }
-    .badge {
-      display:inline-block; padding:3px 10px; border-radius:20px;
-      font-size:12px; font-weight:bold;
-    }
-    .resumo-cards { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:25px; }
-    .resumo-card { background:#1f1f28; border-radius:12px; padding:16px 22px; flex:1; min-width:140px; text-align:center; border:1px solid #2a2a32; }
-    .resumo-card h4 { font-size:13px; color:#aaa; margin-bottom:6px; }
-    .resumo-card span { font-size:26px; font-weight:bold; }
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--sc,var(--accent));}
+.stat-lbl{font-size:11px;color:var(--muted);font-family:var(--font-m);text-transform:uppercase;letter-spacing:.05em;}
+.stat-val{font-size:32px;font-weight:800;margin-top:5px;color:var(--sc,var(--accent));}
 
-    /* PROMOÇÕES */
-    .promo-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:20px; }
-    .promo-card { background:#1f1f28; border-radius:14px; overflow:hidden; border:1px solid #2a2a32; }
-    .promo-card img { width:100%; height:160px; object-fit:cover; }
-    .promo-info { padding:14px; }
-    .promo-info h3 { margin-bottom:6px; }
-    .promo-inputs { display:flex; gap:10px; align-items:center; margin-top:10px; }
-    .promo-inputs input { flex:1; padding:8px; background:#2a2a32; border:none; border-radius:8px; color:white; }
-    .promo-badge { background:var(--yellow); color:#000; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:bold; }
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start;}
+.k-col{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.k-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.k-head h3{font-size:13px;font-weight:700;}
+.k-count{background:var(--border);font-size:11px;font-family:var(--font-m);padding:2px 8px;border-radius:20px;}
+.k-body{padding:10px;display:flex;flex-direction:column;gap:9px;min-height:180px;}
+.k-empty{text-align:center;color:var(--muted);font-size:12px;padding:36px 0;}
+.order-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px;font-size:12.5px;transition:border-color .2s,transform .2s;}
+.order-card:hover{border-color:var(--accent2);transform:translateY(-2px);}
+.oc-id{font-family:var(--font-m);color:var(--accent);font-size:11px;font-weight:700;}
+.oc-date{color:var(--muted);font-size:11px;}
+.oc-name{font-weight:700;margin:6px 0 3px;}
+.oc-phone{color:var(--accent2);font-size:11px;margin-bottom:7px;}
+.oc-ref{font-size:11px;color:var(--purple);margin:-3px 0 7px;font-style:italic;}
+.oc-addr{background:var(--card);border-radius:7px;padding:7px 9px;font-size:11px;color:var(--muted);margin-bottom:7px;cursor:pointer;border:1px solid var(--border);transition:border-color .2s;}
+.oc-addr:hover{border-color:var(--green);color:var(--green);}
+.oc-items{font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.5;}
+.oc-pay{font-size:11px;color:var(--yellow);margin-bottom:4px;}
+.oc-total{font-family:var(--font-m);color:var(--green);font-size:17px;font-weight:700;margin:6px 0;}
+.status-sel{width:100%;padding:7px;border-radius:7px;background:var(--card);color:var(--text);border:1px solid var(--border);font-size:12px;font-family:var(--font-d);margin-bottom:5px;}
+.upd-btn{width:100%;padding:8px;background:rgba(255,107,53,.1);color:var(--accent);border:1px solid rgba(255,107,53,.25);border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-d);transition:all .2s;}
+.upd-btn:hover{background:rgba(255,107,53,.2);}
 
-    /* MODAL */
-    .modal {
-      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center;
-    }
-    .modal-content { background:#1f1f28; padding:25px; border-radius:16px; width:90%; max-width:420px; }
-    input, textarea {
-      width:100%; padding:12px; margin:10px 0;
-      background:#2a2a32; border:none; border-radius:8px; color:white;
-    }
+.map-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.map-inner{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;width:90%;max-width:500px;}
+.map-inner h3{font-size:17px;font-weight:800;margin-bottom:8px;}
+.map-addr{color:var(--muted);font-size:13px;background:var(--surface);padding:11px;border-radius:9px;font-family:var(--font-m);margin-bottom:6px;line-height:1.5;}
+.map-ref{font-size:11px;color:var(--purple);padding:8px 11px;background:rgba(179,136,255,.06);border-radius:9px;margin-bottom:14px;font-style:italic;display:none;}
+.map-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.map-btn-opt{padding:14px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-d);transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.map-btn-opt .ico{font-size:26px;}
+.map-btn-opt:hover{border-color:var(--accent2);background:rgba(0,229,255,.07);color:var(--accent2);}
+.map-copy{width:100%;padding:11px;background:rgba(255,215,64,.08);color:var(--yellow);border:1px solid rgba(255,215,64,.25);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-d);transition:all .2s;margin-bottom:8px;}
+.map-copy:hover{background:rgba(255,215,64,.15);}
+.map-close{width:100%;padding:9px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:9px;font-size:12px;cursor:pointer;font-family:var(--font-d);transition:all .2s;}
+.map-close:hover{color:var(--text);border-color:var(--text);}
 
-    @media(max-width:768px){
-      .kanban { display:flex; overflow-x:auto; padding-bottom:10px; }
-      .kanban-coluna { min-width:280px; flex-shrink:0; }
-      .relatorio-table { display:block; overflow-x:auto; }
-    }
-  </style>
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px;width:90%;max-width:450px;max-height:90vh;overflow-y:auto;}
+.modal-box h3{font-size:18px;font-weight:800;margin-bottom:18px;}
+.fg{margin-bottom:13px;}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;font-family:var(--font-d);transition:border-color .2s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--accent);}
+.fg textarea{min-height:80px;resize:vertical;}
+.modal-actions{display:flex;gap:9px;margin-top:18px;}
+
+.btn{padding:9px 15px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font-d);border:none;transition:all .2s;}
+.btn-acc{background:var(--accent);color:#000;}
+.btn-acc:hover{filter:brightness(1.1);}
+.btn-out{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-out:hover{border-color:var(--text);}
+.btn-red{background:rgba(255,23,68,.1);color:var(--red);border:1px solid rgba(255,23,68,.25);}
+.btn-red:hover{background:rgba(255,23,68,.2);}
+.btn-grn{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.25);}
+.btn-grn:hover{background:rgba(0,230,118,.2);}
+.btn-yel{background:rgba(255,215,64,.1);color:var(--yellow);border:1px solid rgba(255,215,64,.25);}
+.btn-yel:hover{background:rgba(255,215,64,.2);}
+.btn-full{width:100%;padding:11px;font-size:13px;}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:20px;}
+.toolbar input,.toolbar select{padding:9px 13px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;font-family:var(--font-d);}
+.toolbar input:focus,.toolbar select:focus{outline:none;border-color:var(--accent);}
+
+.cat-bar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px;}
+.cat-pill{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-d);transition:all .2s;}
+.cat-pill:hover{color:var(--text);border-color:var(--text);}
+.cat-pill.active{background:rgba(255,107,53,.1);color:var(--accent);border-color:var(--accent);}
+
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px;}
+.prod-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s,transform .2s;}
+.prod-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.prod-card img{width:100%;height:150px;object-fit:cover;}
+.prod-body{padding:14px;}
+.prod-name{font-size:15px;font-weight:800;margin-bottom:3px;}
+.prod-desc{font-size:11px;color:var(--muted);margin-bottom:7px;line-height:1.5;}
+.prod-cat{display:inline-block;padding:2px 9px;background:rgba(0,229,255,.08);color:var(--accent2);border:1px solid rgba(0,229,255,.18);border-radius:20px;font-size:10px;font-weight:700;margin-bottom:8px;}
+.prod-price{font-family:var(--font-m);color:var(--green);font-size:18px;font-weight:700;}
+.prod-promo{font-family:var(--font-m);color:var(--yellow);font-size:12px;margin-top:2px;}
+.prod-actions{display:flex;gap:7px;margin-top:11px;}
+
+.cat-list{display:flex;flex-direction:column;gap:7px;margin:10px 0;}
+.cat-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px 13px;font-size:13px;}
+.cat-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:15px;padding:3px;}
+.cat-add-row{display:flex;gap:8px;margin-top:8px;}
+.cat-add-row input{flex:1;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;font-family:var(--font-d);}
+.cat-add-row input:focus{outline:none;border-color:var(--accent);}
+
+/* ── PROMOÇÕES (novo layout) ── */
+.promo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+.promo-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .3s;}
+.promo-card.ativa{border-color:var(--yellow);box-shadow:0 0 18px rgba(255,215,64,.12);}
+.promo-card img{width:100%;height:140px;object-fit:cover;}
+.promo-body{padding:16px;}
+.promo-name{font-size:15px;font-weight:800;margin-bottom:2px;}
+.promo-cat{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.promo-preco-orig{font-family:var(--font-m);color:var(--green);font-size:17px;font-weight:700;margin-bottom:12px;}
+
+/* toggle ativo/inativo */
+.promo-toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:10px;padding:10px 13px;margin-bottom:12px;}
+.promo-toggle-lbl{font-size:13px;font-weight:700;}
+.promo-toggle-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.toggle-sw{width:44px;height:24px;background:var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background .25s;flex-shrink:0;}
+.toggle-sw.on{background:var(--yellow);}
+.toggle-sw::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:left .25s;}
+.toggle-sw.on::after{left:23px;}
+
+/* campo preço promo */
+.promo-preco-field{margin-bottom:10px;}
+.promo-preco-field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;}
+.promo-preco-input-row{display:flex;gap:8px;align-items:center;}
+.promo-preco-input-row input{flex:1;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:14px;font-family:var(--font-m);transition:border-color .2s;}
+.promo-preco-input-row input:focus{outline:none;border-color:var(--yellow);}
+.promo-preco-input-row input:disabled{opacity:.4;cursor:not-allowed;}
+
+/* badge */
+.promo-badge-ativa{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(255,215,64,.1);color:var(--yellow);border:1px solid rgba(255,215,64,.3);border-radius:20px;font-size:11px;font-weight:700;margin-top:4px;font-family:var(--font-m);}
+.promo-badge-inativa{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:700;margin-top:4px;font-family:var(--font-m);}
+.desconto-pill{display:inline-block;padding:3px 9px;background:rgba(255,23,68,.12);color:var(--red);border-radius:20px;font-size:10px;font-weight:700;margin-left:6px;font-family:var(--font-m);}
+
+.rel-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:14px;}
+.rel-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.rel-table th{background:var(--surface);padding:11px 13px;text-align:left;color:var(--accent2);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-bottom:1px solid var(--border);}
+.rel-table td{padding:11px 13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.rel-table tr:hover td{background:var(--surface);}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:700;font-family:var(--font-m);}
+
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
+.cfg-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;}
+.cfg-card h3{font-size:14px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:9px;padding:12px 14px;margin-bottom:8px;}
+.toggle-row .tl{font-size:13px;font-weight:600;}
+.toggle-row .ts{font-size:11px;color:var(--muted);margin-top:2px;}
+.toggle{width:44px;height:24px;background:var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;}
+.toggle.on::after{left:23px;}
+
+.cancel-card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--red);border-radius:12px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;}
+
+#store-banner{display:none;background:rgba(255,23,68,.08);border:1px solid rgba(255,23,68,.25);border-radius:11px;padding:11px 15px;color:var(--red);font-size:12.5px;font-weight:700;margin-bottom:18px;align-items:center;gap:9px;}
+#store-banner.show{display:flex;}
+
+@media(max-width:860px){
+  .sidebar{display:none;}
+  .kanban{grid-template-columns:1fr;}
+  .cfg-grid{grid-template-columns:1fr;}
+}
+</style>
 </head>
 <body>
-<div class="container">
 
-  <div id="loading" class="loading-overlay"><div class="spinner"></div></div>
+<div id="loading"><div class="spin"></div></div>
 
-  <header>
-    <h2>🔧 Painel Admin - Felix Delivery</h2>
-    <button onclick="logout()" style="background:#c62828;">Sair</button>
-  </header>
-
-  <!-- LOGIN -->
-  <div id="login">
-    <h2>🔑 Login Administrativo</h2>
-    <input type="text" id="usuario" placeholder="Usuário" value="admin"><br><br>
-    <input type="password" id="senha" placeholder="Senha" value="123"><br><br>
-    <button class="btn-primary" onclick="entrar()" style="width:100%;padding:16px;">Entrar</button>
+<!-- MAP MODAL -->
+<div class="map-modal" id="mapModal">
+  <div class="map-inner">
+    <h3>📍 Navegar até o Cliente</h3>
+    <div class="map-addr" id="mapAddrTxt"></div>
+    <div class="map-ref" id="mapRefTxt"></div>
+    <div class="map-grid">
+      <button class="map-btn-opt" onclick="openGoogleMaps()"><span class="ico">🗺️</span>Google Maps</button>
+      <button class="map-btn-opt" onclick="openWaze()"><span class="ico">🚗</span>Waze</button>
+      <button class="map-btn-opt" onclick="openAppleMaps()"><span class="ico">🍎</span>Apple Maps</button>
+      <button class="map-btn-opt" onclick="openStreetView()"><span class="ico">🏘️</span>Street View</button>
+    </div>
+    <button class="map-copy" onclick="copyAddr()">📋 Copiar Endereço</button>
+    <button class="map-close" onclick="closeMap()">Fechar</button>
   </div>
-
-  <!-- DASHBOARD -->
-  <div id="painel" style="display:none;">
-    <h2>Dashboard</h2>
-    <div style="margin:20px 0; display:flex; flex-wrap:wrap; gap:8px;">
-      <button class="btn-primary" onclick="abrirPedidos()">📋 Pedidos Ativos</button>
-      <button class="btn-primary" onclick="abrirCancelados()">❌ Cancelados</button>
-      <button class="btn-primary" onclick="abrirProdutos()">📦 Produtos</button>
-      <button class="btn-yellow" onclick="abrirPromocoes()">🏷️ Promoções</button>
-      <button class="btn-green"  onclick="abrirRelatorios()">📊 Relatórios</button>
-      <button class="btn-primary" onclick="abrirConfiguracoes()">⚙️ Configurações</button>
-    </div>
-    <div style="display:flex; gap:20px; flex-wrap:wrap;">
-      <div class="card" style="flex:1;text-align:center;">
-        <h3>Total de Pedidos</h3>
-        <h1 id="total-pedidos" style="color:var(--accent);font-size:42px;">0</h1>
-      </div>
-      <div class="card" style="flex:1;text-align:center;">
-        <h3>Valor Total</h3>
-        <h1 id="valor-total" style="color:var(--green);font-size:42px;">R$ 0,00</h1>
-      </div>
-    </div>
-  </div>
-
-  <!-- PEDIDOS ATIVOS (Kanban sem Entregue/Cancelado) -->
-  <div id="pedidos-section" style="display:none;">
-    <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
-    <h2 style="margin:10px 0 20px;">📋 Pedidos Ativos</h2>
-    <div id="pedidos-kanban" class="kanban"></div>
-  </div>
-
-  <!-- CANCELADOS -->
-  <div id="cancelados-section" style="display:none;">
-    <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
-    <h2 style="margin:10px 0 20px;">❌ Pedidos Cancelados</h2>
-    <div id="cancelados"></div>
-  </div>
-
-  <!-- PRODUTOS -->
-  <div id="produtos-section" style="display:none;">
-    <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
-    <h2 style="margin:10px 0 20px;">📦 Gerenciar Produtos</h2>
-    <button class="btn-primary" onclick="novoProduto()">+ Novo Produto</button>
-    <div id="listaProdutos"></div>
-  </div>
-
-  <!-- PROMOÇÕES -->
-  <div id="promocoes-section" style="display:none;">
-    <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
-    <h2 style="margin:10px 0 20px;">🏷️ Gerenciar Promoções</h2>
-    <p style="color:#aaa; margin-bottom:20px;">
-      Defina um preço promocional para cada produto. Deixe em branco para desativar.
-    </p>
-    <div id="listaPromocoes" class="promo-grid"></div>
-  </div>
-
-  <!-- RELATÓRIOS -->
-  <div id="relatorios-section" style="display:none;">
-    <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
-    <h2 style="margin:10px 0 20px;">📊 Relatórios de Pedidos</h2>
-
-    <div class="filtros">
-      <input type="date" id="filtroDataInicio" placeholder="Data início">
-      <input type="date" id="filtroDataFim" placeholder="Data fim">
-      <select id="filtroStatus">
-        <option value="">Todos os status</option>
-        <option>Pendente</option>
-        <option>Em preparo</option>
-        <option>Saiu para entrega</option>
-        <option>Entregue</option>
-        <option>Cancelado</option>
-      </select>
-      <input type="text" id="filtroBusca" placeholder="🔍 Buscar cliente, item...">
-      <button class="btn-primary" onclick="aplicarFiltros()">Filtrar</button>
-      <button class="btn-back" onclick="limparFiltros()">Limpar</button>
-    </div>
-
-    <div class="resumo-cards">
-      <div class="resumo-card">
-        <h4>Total Pedidos</h4>
-        <span id="r-total" style="color:var(--accent);">0</span>
-      </div>
-      <div class="resumo-card">
-        <h4>Faturamento</h4>
-        <span id="r-faturamento" style="color:var(--green);">R$ 0</span>
-      </div>
-      <div class="resumo-card">
-        <h4>Entregues</h4>
-        <span id="r-entregues" style="color:var(--green);">0</span>
-      </div>
-      <div class="resumo-card">
-        <h4>Cancelados</h4>
-        <span id="r-cancelados" style="color:var(--red);">0</span>
-      </div>
-      <div class="resumo-card">
-        <h4>Ticket Médio</h4>
-        <span id="r-ticket" style="color:var(--yellow);">R$ 0</span>
-      </div>
-    </div>
-
-    <div style="overflow-x:auto;">
-      <table class="relatorio-table">
-        <thead>
-          <tr>
-            <th>#ID</th>
-            <th>Data</th>
-            <th>Cliente</th>
-            <th>Telefone</th>
-            <th>Itens</th>
-            <th>Total</th>
-            <th>Pagamento</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="relatorio-body"></tbody>
-      </table>
-    </div>
-    <p id="relatorio-vazio" style="text-align:center;color:#aaa;margin-top:30px;display:none;">
-      Nenhum pedido encontrado com esses filtros.
-    </p>
-  </div>
-
-  <!-- CONFIGURAÇÕES -->
-  <div id="config-section" style="display:none;">
-    <button class="btn-back" onclick="voltarParaMenu()">← Voltar</button>
-    <h2 style="margin-bottom:20px;">⚙️ Configurações da Loja</h2>
-    <div class="card">
-      <h3>🎨 Personalização</h3>
-      <input type="text" id="nomeLoja" placeholder="Nome da Loja">
-      <label>Cor principal</label>
-      <input type="color" id="corSistema" value="#00d4ff" style="height:60px;">
-      <input type="text" id="logoLoja" placeholder="URL da Logo">
-      <button class="btn-primary" onclick="salvarConfiguracoes()" style="width:100%;margin-top:15px;">💾 Salvar Configurações</button>
-    </div>
-    <div class="card">
-      <h3>🚚 Delivery</h3>
-      <input type="text" id="taxaEntrega" placeholder="Taxa de entrega">
-      <input type="text" id="tempoEntrega" placeholder="Tempo médio">
-      <input type="text" id="pedidoMinimo" placeholder="Pedido mínimo">
-    </div>
-    <div class="card">
-      <h3>📱 WhatsApp</h3>
-      <input type="text" id="whatsappLoja" placeholder="WhatsApp">
-      <textarea id="mensagemAuto" placeholder="Mensagem automática" style="min-height:120px;"></textarea>
-    </div>
-    <div class="card">
-      <h3>🟢 Status da Loja</h3>
-      <button id="btnLoja" class="btn-primary" onclick="toggleLoja()" style="width:100%;padding:18px;font-size:18px;">🟢 Loja Aberta</button>
-    </div>
-  </div>
-
 </div>
 
-<!-- MODAL PRODUTO -->
-<div id="modalProduto" class="modal">
-  <div class="modal-content">
-    <h3 id="modalTitulo">Novo Produto</h3>
-    <input type="text"   id="prodNome"      placeholder="Nome do produto">
-    <input type="number" id="prodPreco"     placeholder="Preço (ex: 29.90)" step="0.01">
-    <input type="text"   id="prodCategoria" placeholder="Categoria">
-    <input type="text"   id="prodImagem"    placeholder="URL da Imagem">
-    <div style="margin-top:20px;display:flex;gap:10px;">
-      <button class="btn-primary" onclick="salvarModal()" style="flex:1;">Salvar</button>
-      <button class="btn-back"    onclick="fecharModal()" style="flex:1;">Cancelar</button>
+<!-- PRODUTO MODAL -->
+<div class="modal" id="prodModal">
+  <div class="modal-box">
+    <h3 id="prodModalTitle">Novo Produto</h3>
+    <div class="fg"><label>Nome *</label><input type="text" id="pNome" placeholder="Ex: X-Burguer Especial"></div>
+    <div class="fg"><label>Descrição</label><textarea id="pDescricao" placeholder="Ingredientes, detalhes..."></textarea></div>
+    <div class="fg">
+      <label>Categoria *</label>
+      <select id="pCategoria"><option value="">Selecione uma categoria...</option></select>
     </div>
+    <div class="fg"><label>Preço (R$) *</label><input type="number" id="pPreco" placeholder="0.00" step="0.01" min="0"></div>
+    <div class="fg"><label>URL da Imagem</label><input type="url" id="pImagem" placeholder="https://..."></div>
+    <div class="modal-actions">
+      <button class="btn btn-acc" style="flex:1;" onclick="saveProduto()">Salvar</button>
+      <button class="btn btn-out" onclick="closeProdModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORIA MODAL -->
+<div class="modal" id="catModal">
+  <div class="modal-box">
+    <h3>🏷️ Gerenciar Categorias</h3>
+    <div class="cat-list" id="catList"></div>
+    <div class="cat-add-row">
+      <input type="text" id="newCatInput" placeholder="Nova categoria..." onkeydown="if(event.key==='Enter')addCat()">
+      <button class="btn btn-acc" onclick="addCat()">+ Adicionar</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-out btn-full" onclick="document.getElementById('catModal').style.display='none'">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="logo">🍕 Felix<span>Delivery</span></div>
+  <div style="display:flex;align-items:center;gap:18px;">
+    <div class="store-badge">
+      <div class="store-dot" id="hDot"></div>
+      <span id="hStatus">Loja Aberta</span>
+    </div>
+    <button class="btn btn-red" style="padding:7px 13px;font-size:12px;" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-item active" onclick="goTo('dashboard',this)"><span class="nav-icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="goTo('pedidos',this)"><span class="nav-icon">📋</span> Pedidos Ativos</div>
+    <div class="nav-item" onclick="goTo('cancelados',this)"><span class="nav-icon">❌</span> Cancelados</div>
+    <div class="nav-div"></div>
+    <div class="nav-item" onclick="goTo('produtos',this)"><span class="nav-icon">📦</span> Produtos</div>
+    <div class="nav-item" onclick="goTo('promocoes',this)"><span class="nav-icon">🏷️</span> Promoções</div>
+    <div class="nav-div"></div>
+    <div class="nav-item" onclick="goTo('relatorios',this)"><span class="nav-icon">📈</span> Relatórios</div>
+    <div class="nav-item" onclick="goTo('config',this)"><span class="nav-icon">⚙️</span> Configurações</div>
+  </nav>
+
+  <main>
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="s-dashboard">
+      <div id="store-banner">🔴 Loja FECHADA — clientes não conseguem finalizar pedidos.</div>
+      <div class="pg-head"><h1>Dashboard</h1><p>Visão geral da operação</p></div>
+      <div class="stats-grid">
+        <div class="stat-card" style="--sc:var(--accent2)"><div class="stat-lbl">Total Pedidos</div><div class="stat-val" id="d-total">—</div></div>
+        <div class="stat-card" style="--sc:var(--green)"><div class="stat-lbl">Faturamento</div><div class="stat-val" style="font-size:22px;" id="d-fat">—</div></div>
+        <div class="stat-card" style="--sc:var(--yellow)"><div class="stat-lbl">Ativos Agora</div><div class="stat-val" id="d-ativos">—</div></div>
+        <div class="stat-card" style="--sc:var(--purple)"><div class="stat-lbl">Ticket Médio</div><div class="stat-val" style="font-size:20px;" id="d-ticket">—</div></div>
+      </div>
+    </div>
+
+    <!-- PEDIDOS ATIVOS -->
+    <div class="section" id="s-pedidos">
+      <div class="pg-head"><h1>Pedidos Ativos</h1><p>Kanban em tempo real</p></div>
+      <div class="kanban" id="kanbanBoard"></div>
+    </div>
+
+    <!-- CANCELADOS -->
+    <div class="section" id="s-cancelados">
+      <div class="pg-head"><h1>Cancelados</h1><p>Recolocar pedidos na fila</p></div>
+      <div id="cancelList"></div>
+    </div>
+
+    <!-- PRODUTOS -->
+    <div class="section" id="s-produtos">
+      <div class="pg-head"><h1>Produtos</h1><p>Gerenciar cardápio</p></div>
+      <div class="toolbar">
+        <button class="btn btn-acc" onclick="openNewProd()">+ Novo Produto</button>
+        <button class="btn btn-out" onclick="openCatModal()">🏷️ Categorias</button>
+        <input type="text" id="prodSearch" placeholder="🔍 Buscar..." oninput="renderProds()" style="min-width:180px;">
+      </div>
+      <div class="cat-bar" id="catBar"></div>
+      <div class="prod-grid" id="prodGrid"></div>
+    </div>
+
+    <!-- PROMOÇÕES -->
+    <div class="section" id="s-promocoes">
+      <div class="pg-head">
+        <h1>Promoções</h1>
+        <p>Ative a promoção e defina o preço promocional. O cliente vê o preço riscado e o novo preço em destaque.</p>
+      </div>
+      <!-- LEGENDA -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--yellow);box-shadow:0 0 6px var(--yellow);"></div>
+          Promoção ativa — aparece no cardápio do cliente
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--border);"></div>
+          Sem promoção — preço normal exibido
+        </div>
+      </div>
+      <div class="promo-grid" id="promoGrid"></div>
+    </div>
+
+    <!-- RELATÓRIOS -->
+    <div class="section" id="s-relatorios">
+      <div class="pg-head"><h1>Relatórios</h1><p>Análise de pedidos e faturamento</p></div>
+      <div class="toolbar" style="flex-wrap:wrap;">
+        <input type="date" id="fDI" style="min-width:140px;">
+        <input type="date" id="fDF" style="min-width:140px;">
+        <select id="fSt" style="min-width:155px;padding:9px 13px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--font-d);font-size:13px;">
+          <option value="">Todos os status</option>
+          <option>Pendente</option><option>Em preparo</option>
+          <option>Saiu para entrega</option><option>Entregue</option><option>Cancelado</option>
+        </select>
+        <input type="text" id="fBq" placeholder="🔍 Cliente, item, telefone..." style="min-width:190px;" oninput="applyFilters()">
+        <button class="btn btn-acc" onclick="applyFilters()">Filtrar</button>
+        <button class="btn btn-out" onclick="clearFilters()">Limpar</button>
+      </div>
+      <div class="stats-grid" style="margin-bottom:18px;">
+        <div class="stat-card" style="--sc:var(--accent2)"><div class="stat-lbl">Total</div><div class="stat-val" id="r-total">0</div></div>
+        <div class="stat-card" style="--sc:var(--green)"><div class="stat-lbl">Faturamento</div><div class="stat-val" style="font-size:18px;" id="r-fat">R$0</div></div>
+        <div class="stat-card" style="--sc:var(--green)"><div class="stat-lbl">Entregues</div><div class="stat-val" id="r-ent">0</div></div>
+        <div class="stat-card" style="--sc:var(--red)"><div class="stat-lbl">Cancelados</div><div class="stat-val" id="r-can">0</div></div>
+        <div class="stat-card" style="--sc:var(--yellow)"><div class="stat-lbl">Ticket Médio</div><div class="stat-val" style="font-size:18px;" id="r-tick">R$0</div></div>
+      </div>
+      <div class="rel-wrap">
+        <table class="rel-table">
+          <thead><tr>
+            <th>#ID</th><th>Data</th><th>Cliente</th><th>Telefone</th>
+            <th>Endereço / Ref.</th><th>Itens</th><th>Total</th><th>Pagamento</th><th>Status</th>
+          </tr></thead>
+          <tbody id="relBody"></tbody>
+        </table>
+        <p id="relEmpty" style="text-align:center;color:var(--muted);padding:36px;display:none;">Nenhum pedido encontrado.</p>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div class="section" id="s-config">
+      <div class="pg-head"><h1>Configurações</h1><p>Personalize sua loja</p></div>
+      <div class="cfg-grid">
+        <div class="cfg-card" style="grid-column:1/-1;">
+          <h3>🟢 Status da Loja</h3>
+          <div class="toggle-row">
+            <div><div class="tl">Loja Aberta / Fechada</div><div class="ts">Quando fechada, clientes veem aviso e não conseguem pedir</div></div>
+            <div class="toggle on" id="storeToggle" onclick="toggleStore()"></div>
+          </div>
+          <div id="storeMsg" style="font-size:12px;padding:10px 13px;background:var(--surface);border-radius:9px;color:var(--green);">✅ Loja aberta — clientes podem pedir normalmente.</div>
+        </div>
+        <div class="cfg-card">
+          <h3>🎨 Personalização</h3>
+          <div class="fg"><label>Nome da Loja</label><input type="text" id="cfNome" placeholder="Felix Delivery"></div>
+          <div class="fg"><label>Slogan</label><input type="text" id="cfSlogan" placeholder="O melhor delivery da cidade"></div>
+          <div class="fg"><label>Cor Principal</label><input type="color" id="cfCor" value="#ff6b35" style="height:44px;cursor:pointer;"></div>
+          <div class="fg"><label>URL da Logo</label><input type="url" id="cfLogo" placeholder="https://..."></div>
+        </div>
+        <div class="cfg-card">
+          <h3>🚚 Delivery</h3>
+          <div class="fg"><label>Taxa de Entrega (R$)</label><input type="number" id="cfTaxa" placeholder="5.00" step="0.50"></div>
+          <div class="fg"><label>Tempo Médio</label><input type="text" id="cfTempo" placeholder="30-45 minutos"></div>
+          <div class="fg"><label>Pedido Mínimo (R$)</label><input type="number" id="cfMin" placeholder="20.00" step="0.50"></div>
+          <div class="fg"><label>Raio de Entrega (km)</label><input type="number" id="cfRaio" placeholder="5" step="0.5"></div>
+        </div>
+        <div class="cfg-card">
+          <h3>📱 Contato & WhatsApp</h3>
+          <div class="fg"><label>WhatsApp (com DDD)</label><input type="tel" id="cfWA" placeholder="21912345678"></div>
+          <div class="fg"><label>Endereço da Loja</label><input type="text" id="cfEnd" placeholder="Rua X, 123 — Bairro"></div>
+          <div class="fg"><label>Mensagem Automática</label><textarea id="cfMsg" placeholder="Olá! Seu pedido foi recebido. ✅"></textarea></div>
+        </div>
+        <div class="cfg-card">
+          <h3>🕐 Horário de Funcionamento</h3>
+          <div class="fg"><label>Segunda a Sexta</label><input type="text" id="cfHSF" placeholder="11:00 – 23:00"></div>
+          <div class="fg"><label>Sábado</label><input type="text" id="cfHSb" placeholder="11:00 – 00:00"></div>
+          <div class="fg"><label>Domingo e Feriados</label><input type="text" id="cfHDm" placeholder="12:00 – 22:00"></div>
+          <div class="toggle-row"><div><div class="tl">Fechamento automático</div><div class="ts">Fecha a loja fora do horário</div></div><div class="toggle" id="tgAuto" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <div class="cfg-card">
+          <h3>🔔 Notificações</h3>
+          <div class="toggle-row"><div><div class="tl">Som em novo pedido</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="toggle-row"><div><div class="tl">Notificações no navegador</div></div><div class="toggle" onclick="this.classList.toggle('on');askNotif()"></div></div>
+          <div class="toggle-row"><div><div class="tl">Alerta de pedido atrasado</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:22px;">
+        <button class="btn btn-acc" style="padding:13px 30px;font-size:14px;" onclick="saveConfig()">💾 Salvar Configurações</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOvl" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:500;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:22px;padding:38px;width:90%;max-width:360px;text-align:center;">
+    <div style="font-size:44px;margin-bottom:14px;">🍕</div>
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:5px;">Felix Delivery</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:24px;">Acesso Administrativo</p>
+    <div class="fg"><label>Usuário</label><input type="text" id="lgU" value="admin" autocomplete="off"></div>
+    <div class="fg"><label>Senha</label><input type="password" id="lgP" value="123" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-acc btn-full" style="margin-top:6px;" onclick="doLogin()">Entrar →</button>
   </div>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxWZ-yKOMDdnIZBJNqCy2Lrg7MVTX0tSsz6ewHxXF58VwnjWLXbN-aQY2XkPxdp7167Ig/exec";
+// ══════════════════════════════════════════════
+// URL do App Script — altere aqui se precisar
+// ══════════════════════════════════════════════
+const API = "https://script.google.com/macros/s/AKfycbznKJb_BIL0L7pC2CEUgHUR1Sscl_7h9pfTv7ZUzEmisnnnPSd-Yc0DifrH9v4V2qEJsQ/exec";
 
-let produtoEditando = null;
-let todosPedidosCache = [];
-let todosProdutosCache = [];
+// ── ESTADO ──
+let allOrders = [];
+let allProds  = [];
+let editingId = null;
+let catFilter = 'all';
+let curAddr   = '';
+let curRef    = '';
+let cats = JSON.parse(localStorage.getItem('fx_cats') || '["Lanches","Bebidas","Sobremesas","Combos"]');
 
-// ==================== LOADING ====================
-function mostrarLoading(){ document.getElementById("loading").style.display="flex"; }
-function esconderLoading(){ document.getElementById("loading").style.display="none"; }
+// ── HELPERS DE PROMOÇÃO ──
+// A planilha usa: col G = "SIM"/"NÃO" | col H = preço promo (número)
+function temPromo(p){
+  return String(p.promocao||'').trim().toUpperCase() === 'SIM'
+      && p.precpromo !== '' && p.precpromo !== null && p.precpromo !== undefined
+      && !isNaN(parseFloat(p.precpromo)) && parseFloat(p.precpromo) > 0;
+}
+function fmtPreco(v){ return parseFloat(v||0).toFixed(2).replace('.',','); }
+function calcDesc(preco, precpromo){ return Math.round((1 - parseFloat(precpromo)/parseFloat(preco))*100); }
 
-// ==================== REQUISIÇÃO ====================
-async function fazerRequisicao(dados){
+// ── LOADING ──
+const $load = document.getElementById('loading');
+function showLoad(){ $load.style.display='flex'; }
+function hideLoad(){ $load.style.display='none'; }
+
+// ── NAVEGAÇÃO ──
+function goTo(id, el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  ({dashboard:loadDash,pedidos:loadKanban,cancelados:loadCanceled,
+    produtos:loadProds,promocoes:loadPromos,relatorios:loadReports,config:loadConfig})[id]?.();
+}
+
+// ── API ──
+async function apiGet(p){ const r=await fetch(API+'?'+p); return r.json(); }
+async function apiPost(body){
   try {
-    await fetch(API,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify(dados),
-      mode:"no-cors"
-    });
-    return {success:true};
-  } catch(e){
-    console.error(e);
-    return {success:false};
-  }
+    await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),mode:'no-cors'});
+    return true;
+  } catch(e){ console.error(e); return false; }
 }
 
-// ==================== LOGIN ====================
-function entrar(){
-  const u = document.getElementById("usuario").value;
-  const s = document.getElementById("senha").value;
-  if(u==="admin"&&s==="123"){
-    localStorage.setItem("adminLogado","sim");
-    mostrarPainel();
-  } else { alert("Login inválido!"); }
+// ── LOGIN ──
+function doLogin(){
+  if(document.getElementById('lgU').value==='admin' && document.getElementById('lgP').value==='123'){
+    localStorage.setItem('fx_admin','1');
+    document.getElementById('loginOvl').style.display='none';
+    updateStoreUI(); loadDash();
+  } else { alert('Login inválido!'); }
 }
+function logout(){ localStorage.removeItem('fx_admin'); location.reload(); }
 
-function mostrarPainel(){
-  document.getElementById("login").style.display="none";
-  document.getElementById("painel").style.display="block";
-  carregarDashboard();
-}
-
-function logout(){
-  localStorage.removeItem("adminLogado");
-  location.reload();
-}
-
-function ocultarTodas(){
-  ["painel","pedidos-section","cancelados-section","produtos-section",
-   "promocoes-section","relatorios-section","config-section"].forEach(id=>{
-    document.getElementById(id).style.display="none";
-  });
-}
-
-function voltarParaMenu(){
-  ocultarTodas();
-  document.getElementById("painel").style.display="block";
-}
-
-function abrirPedidos()    { ocultarTodas(); document.getElementById("pedidos-section").style.display="block";   carregarPedidos(); }
-function abrirCancelados() { ocultarTodas(); document.getElementById("cancelados-section").style.display="block"; carregarCancelados(); }
-function abrirProdutos()   { ocultarTodas(); document.getElementById("produtos-section").style.display="block";  carregarProdutos(); }
-function abrirPromocoes()  { ocultarTodas(); document.getElementById("promocoes-section").style.display="block"; carregarPromocoes(); }
-function abrirRelatorios() { ocultarTodas(); document.getElementById("relatorios-section").style.display="block"; carregarRelatorios(); }
-function abrirConfiguracoes(){ ocultarTodas(); document.getElementById("config-section").style.display="block"; carregarConfiguracoes(); }
-
-// ==================== DASHBOARD ====================
-async function carregarDashboard(){
-  mostrarLoading();
+// ── DASHBOARD ──
+async function loadDash(){
+  showLoad();
   try {
-    const res = await fetch(API+"?pedidos=1");
-    const pedidos = await res.json();
-    const total = pedidos.length;
-    const valor = pedidos.reduce((s,p)=>s+parseFloat(p.total||0),0);
-    document.getElementById("total-pedidos").textContent = total;
-    document.getElementById("valor-total").textContent = "R$ "+valor.toFixed(2).replace(".",",");
-  } catch(e){ console.log(e); }
-  finally { esconderLoading(); }
+    allOrders = await apiGet('pedidos=1');
+    const fat   = allOrders.reduce((s,o)=>s+parseFloat(o.total||0),0);
+    const ativos= allOrders.filter(o=>['Pendente','Em preparo','Saiu para entrega'].includes(o.status)).length;
+    document.getElementById('d-total').textContent  = allOrders.length;
+    document.getElementById('d-fat').textContent    = 'R$'+fat.toFixed(2).replace('.',',');
+    document.getElementById('d-ativos').textContent = ativos;
+    document.getElementById('d-ticket').textContent = 'R$'+(allOrders.length?fat/allOrders.length:0).toFixed(2).replace('.',',');
+  } catch(e){}
+  hideLoad();
 }
 
-// ==================== KANBAN (sem Entregue / Cancelado) ====================
-async function carregarPedidos(){
-  mostrarLoading();
+// ── KANBAN ──
+async function loadKanban(){
+  showLoad();
   try {
-    const res = await fetch(API+"?pedidos=1");
-    const pedidos = await res.json();
-    pedidos.reverse();
-
-    // Apenas status ativos no Kanban
-    const statusLista = [
-      {nome:"Pendente",       cor:"#ff9800"},
-      {nome:"Em preparo",     cor:"#00d4ff"},
-      {nome:"Saiu para entrega", cor:"#9c27b0"},
+    allOrders = await apiGet('pedidos=1');
+    const cols=[
+      {name:'Pendente',          color:'#ff9800'},
+      {name:'Em preparo',        color:'var(--accent2)'},
+      {name:'Saiu para entrega', color:'var(--purple)'},
     ];
-
-    let html = "";
-
-    statusLista.forEach(col => {
-      const filtrados = pedidos.filter(p=>p.status===col.nome);
-      html += `
-        <div class="kanban-coluna" style="border-top:5px solid ${col.cor};">
-          <h2 class="kanban-titulo" style="color:${col.cor};">${col.nome} (${filtrados.length})</h2>`;
-
-      if(!filtrados.length)
-        html += `<p style="opacity:.6;text-align:center;margin-top:40px;">Nenhum pedido</p>`;
-
-      filtrados.forEach(p => { html += cartaoPedido(p); });
-      html += `</div>`;
-    });
-
-    document.getElementById("pedidos-kanban").innerHTML = html;
-  } catch(e){
-    document.getElementById("pedidos-kanban").innerHTML="<p>Erro ao carregar pedidos.</p>";
-  } finally { esconderLoading(); }
+    document.getElementById('kanbanBoard').innerHTML = cols.map(col=>{
+      const items=allOrders.filter(o=>o.status===col.name).reverse();
+      return `<div class="k-col">
+        <div class="k-head" style="border-bottom-color:${col.color}44">
+          <h3 style="color:${col.color}">${col.name}</h3>
+          <span class="k-count">${items.length}</span>
+        </div>
+        <div class="k-body">${items.length?items.map(buildCard).join(''):'<div class="k-empty">Nenhum pedido</div>'}</div>
+      </div>`;
+    }).join('');
+  } catch(e){ document.getElementById('kanbanBoard').innerHTML='<p style="color:var(--muted)">Erro ao carregar.</p>'; }
+  hideLoad();
 }
 
-function cartaoPedido(p){
-  return `
-    <div class="pedido-card">
-      <div class="pedido-info">
-        <strong style="color:var(--accent)">#${p.idPedido}</strong>
-        <span class="pedido-data">${p.data||p.dataHora||p.timestamp||'Sem data'}</span><br><br>
-        👤 ${p.cliente}<br>
-        📞 ${p.telefone}<br><br>
-        📍 ${p.endereco}
-        <button onclick="abrirMapa('${encodeURIComponent(p.endereco)}')"
-          style="margin-top:8px;width:100%;background:#34a853;color:white;border:none;
-                 padding:10px;border-radius:8px;cursor:pointer;">
-          📍 Abrir no Maps
-        </button><br><br>
-        🍔 ${p.itens}
-        <div class="pedido-total">R$ ${parseFloat(p.total||0).toFixed(2).replace(".",",")}</div>
-      </div>
-      <select id="status-${p.idPedido}" class="status-select">
-        <option value="Pendente"            ${p.status==="Pendente"?"selected":""}>Pendente</option>
-        <option value="Em preparo"          ${p.status==="Em preparo"?"selected":""}>Em preparo</option>
-        <option value="Saiu para entrega"   ${p.status==="Saiu para entrega"?"selected":""}>Saiu para entrega</option>
-        <option value="Entregue"            ${p.status==="Entregue"?"selected":""}>Entregue ✅</option>
-        <option value="Cancelado"           ${p.status==="Cancelado"?"selected":""}>Cancelado ❌</option>
-      </select>
-      <button class="btn-primary btn-status" onclick="alterarStatus('${p.idPedido}')">Atualizar Status</button>
-    </div>`;
+function buildCard(o){
+  return `<div class="order-card">
+    <div style="display:flex;justify-content:space-between;">
+      <span class="oc-id">#${o.idPedido}</span>
+      <span class="oc-date">${o.data||''}</span>
+    </div>
+    <div class="oc-name">👤 ${o.cliente}</div>
+    <div class="oc-phone">📞 ${o.telefone}</div>
+    <div class="oc-addr" onclick="openMap('${esc(o.endereco)}','${esc(o.referencia||'')}')">
+      📍 ${o.endereco||'—'} <span style="float:right;opacity:.6">▶</span>
+    </div>
+    ${o.referencia?`<div class="oc-ref">📌 Ref: ${o.referencia}</div>`:''}
+    <div class="oc-items">🍔 ${o.itens||'—'}</div>
+    <div class="oc-pay">💳 ${o.pagamento||'—'}</div>
+    <div class="oc-total">R$ ${fmtPreco(o.total)}</div>
+    <select id="st-${o.idPedido}" class="status-sel">
+      ${['Pendente','Em preparo','Saiu para entrega','Entregue','Cancelado'].map(s=>
+        `<option value="${s}" ${o.status===s?'selected':''}>${s}${s==='Entregue'?' ✅':s==='Cancelado'?' ❌':''}</option>`
+      ).join('')}
+    </select>
+    <button class="upd-btn" onclick="updateStatus('${o.idPedido}')">Atualizar Status →</button>
+  </div>`;
+}
+function esc(s){ return (s||'').replace(/'/g,"&#39;").replace(/\n/g,' '); }
+
+async function updateStatus(id){
+  const st=document.getElementById('st-'+id).value;
+  await apiPost({acao:'alterarStatus',idPedido:id,status:st});
+  loadKanban(); loadDash();
 }
 
-// ==================== CANCELADOS ====================
-async function carregarCancelados(){
-  mostrarLoading();
+// ── MAPA ──
+function openMap(addr,ref){
+  curAddr=decodeURIComponent(addr); curRef=decodeURIComponent(ref);
+  document.getElementById('mapAddrTxt').textContent=curAddr;
+  const re=document.getElementById('mapRefTxt');
+  if(curRef){ re.textContent='📌 Referência: '+curRef; re.style.display='block'; }
+  else { re.style.display='none'; }
+  document.getElementById('mapModal').style.display='flex';
+}
+function closeMap(){ document.getElementById('mapModal').style.display='none'; }
+function openGoogleMaps(){ window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(curAddr)}`,'_blank'); }
+function openWaze(){ window.open(`https://waze.com/ul?q=${encodeURIComponent(curAddr)}&navigate=yes`,'_blank'); }
+function openAppleMaps(){ window.open(`https://maps.apple.com/?q=${encodeURIComponent(curAddr)}`,'_blank'); }
+function openStreetView(){ window.open(`https://www.google.com/maps?layer=c&q=${encodeURIComponent(curAddr)}`,'_blank'); }
+function copyAddr(){ navigator.clipboard.writeText(curAddr+(curRef?' — Ref: '+curRef:'')).then(()=>alert('📋 Copiado!')); }
+
+// ── CANCELADOS ──
+async function loadCanceled(){
+  showLoad();
   try {
-    const res = await fetch(API+"?pedidos=1");
-    const pedidos = await res.json();
-    const cancelados = pedidos.filter(p=>p.status==="Cancelado");
-
-    let html = "";
-    cancelados.reverse().forEach(p=>{
-      html += `
-        <div class="card" style="border-left:5px solid var(--red);">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
-            <div>
-              <strong style="color:var(--red)">Pedido #${p.idPedido}</strong>
-              <small style="color:#aaa;margin-left:10px;">${p.data||p.dataHora||''}</small><br><br>
-              👤 ${p.cliente} &nbsp;|&nbsp; 📞 ${p.telefone}<br>
-              🍔 ${p.itens}<br>
-              💰 <strong style="color:var(--green)">R$ ${parseFloat(p.total||0).toFixed(2).replace(".",",")}</strong>
-            </div>
-            <div>
-              <select id="rev-status-${p.idPedido}" style="padding:8px;background:#2a2a32;border:none;border-radius:8px;color:white;margin-bottom:8px;">
-                <option value="Pendente">Pendente</option>
-                <option value="Em preparo">Em preparo</option>
-              </select><br>
-              <button class="btn-yellow" onclick="reverterStatus('${p.idPedido}')">🔄 Recolocar na Fila</button>
-            </div>
+    const orders=await apiGet('pedidos=1');
+    const list=orders.filter(o=>o.status==='Cancelado').reverse();
+    document.getElementById('cancelList').innerHTML=list.length
+      ?list.map(o=>`
+        <div class="cancel-card">
+          <div>
+            <span style="font-family:var(--font-m);color:var(--red);font-weight:700;">#${o.idPedido}</span>
+            <span style="color:var(--muted);font-size:11px;margin-left:10px;">${o.data||''}</span><br><br>
+            <strong>👤 ${o.cliente}</strong> &nbsp;|&nbsp; 📞 ${o.telefone}<br>
+            <span style="color:var(--muted);font-size:12px;">🍔 ${o.itens}</span><br>
+            ${o.referencia?`<span style="color:var(--purple);font-size:11px;">📌 ${o.referencia}</span><br>`:''}
+            <span style="font-family:var(--font-m);color:var(--green);font-size:16px;">R$ ${fmtPreco(o.total)}</span>
           </div>
-        </div>`;
-    });
-
-    document.getElementById("cancelados").innerHTML = html || "<p style='color:#aaa;'>Nenhum pedido cancelado.</p>";
-  } catch(e){
-    document.getElementById("cancelados").innerHTML="<p>Erro ao carregar.</p>";
-  } finally { esconderLoading(); }
-}
-
-async function reverterStatus(idPedido){
-  const novoStatus = document.getElementById(`rev-status-${idPedido}`).value;
-  if(!confirm(`Recolocar pedido #${idPedido} como "${novoStatus}"?`)) return;
-
-  const res = await fazerRequisicao({acao:"alterarStatus", idPedido, status:novoStatus});
-  if(res.success){
-    alert("✅ Pedido recolocado na fila!");
-    carregarCancelados();
-    carregarDashboard();
-  } else { alert("❌ Erro ao reverter status"); }
-}
-
-// ==================== PRODUTOS ====================
-async function carregarProdutos(){
-  mostrarLoading();
-  try {
-    const res = await fetch(API+"?produtos=1");
-    todosProdutosCache = await res.json();
-
-    let html = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:20px;">`;
-    todosProdutosCache.forEach(p=>{
-      const emPromocao = p.promocao && parseFloat(p.promocao)>0;
-      html += `
-        <div class="card" style="text-align:center;">
-          <img src="${p.imagem||'[placehold.co](https://placehold.co/600x400)'}"
-               style="width:100%;height:180px;object-fit:cover;border-radius:12px;">
-          <h3 style="margin:12px 0 4px;">${p.nome}</h3>
-          <h2 style="color:var(--green);">R$ ${parseFloat(p.preco).toFixed(2).replace(".",",")}</h2>
-          ${emPromocao?`<span class="promo-badge">🏷️ Promo: R$ ${parseFloat(p.promocao).toFixed(2).replace(".",",")}</span>`:''}
-          <p style="color:#aaa;font-size:13px;">${p.categoria||""}</p>
-          <div style="margin-top:12px;">
-            <button class="btn-primary" onclick="editarProduto('${p.id}')">✏️ Editar</button>
-            <button class="btn-danger"  onclick="excluirProduto('${p.id}')">🗑 Excluir</button>
+          <div style="display:flex;flex-direction:column;gap:7px;min-width:160px;">
+            <select id="rv-${o.idPedido}" style="padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-d);">
+              <option>Pendente</option><option>Em preparo</option>
+            </select>
+            <button class="btn btn-yel" onclick="revert('${o.idPedido}')">🔄 Recolocar na Fila</button>
           </div>
-        </div>`;
-    });
-    html += `</div>`;
-    document.getElementById("listaProdutos").innerHTML = html;
-  } catch(e){
-    document.getElementById("listaProdutos").innerHTML="<p>Erro ao carregar produtos.</p>";
-  } finally { esconderLoading(); }
+        </div>`).join('')
+      :'<p style="color:var(--muted);text-align:center;padding:40px;">Nenhum pedido cancelado.</p>';
+  } catch(e){}
+  hideLoad();
+}
+async function revert(id){
+  const st=document.getElementById('rv-'+id).value;
+  if(!confirm(`Recolocar #${id} como "${st}"?`)) return;
+  await apiPost({acao:'alterarStatus',idPedido:id,status:st}); loadCanceled();
 }
 
-// ==================== PROMOÇÕES ====================
-async function carregarPromocoes(){
-  mostrarLoading();
-  try {
-    const res = await fetch(API+"?produtos=1");
-    todosProdutosCache = await res.json();
-
-    let html = "";
-    todosProdutosCache.forEach(p=>{
-      const promoAtual = p.promocao && parseFloat(p.promocao)>0 ? parseFloat(p.promocao).toFixed(2) : "";
-      html += `
-        <div class="promo-card">
-          <img src="${p.imagem||'[placehold.co](https://placehold.co/600x400)'}" alt="">
-          <div class="promo-info">
-            <h3>${p.nome}</h3>
-            <p style="color:#aaa;font-size:13px;">${p.categoria||""}</p>
-            <p>Preço original: <strong style="color:var(--green);">R$ ${parseFloat(p.preco).toFixed(2).replace(".",",")}</strong></p>
-            <div class="promo-inputs">
-              <input type="number" id="promo-${p.id}" placeholder="Preço promo" step="0.01"
-                     value="${promoAtual}" style="margin:0;">
-              <button class="btn-yellow" onclick="salvarPromocao('${p.id}')">💾</button>
-              ${promoAtual?`<button class="btn-danger" onclick="removerPromocao('${p.id}')">✕</button>`:''}
-            </div>
-            ${promoAtual?`<p style="margin-top:8px;"><span class="promo-badge">🏷️ Em promoção: R$ ${promoAtual}</span></p>`:'<p style="color:#666;font-size:12px;margin-top:8px;">Sem promoção ativa</p>'}
-          </div>
-        </div>`;
-    });
-
-    document.getElementById("listaPromocoes").innerHTML = html || "<p>Nenhum produto cadastrado.</p>";
-  } catch(e){
-    document.getElementById("listaPromocoes").innerHTML="<p>Erro ao carregar.</p>";
-  } finally { esconderLoading(); }
+// ── CATEGORIAS ──
+function saveCats(){ localStorage.setItem('fx_cats',JSON.stringify(cats)); }
+function renderCatModal(){
+  document.getElementById('catList').innerHTML=cats.map((c,i)=>`
+    <div class="cat-item"><span>${c}</span><button class="cat-del" onclick="delCat(${i})">✕</button></div>`).join('');
 }
-
-async function salvarPromocao(id){
-  const val = document.getElementById(`promo-${id}`).value;
-  const preco = parseFloat(val);
-  if(isNaN(preco)||preco<=0){ alert("Digite um preço promocional válido."); return; }
-
-  const res = await fazerRequisicao({acao:"salvarPromocao", id, promocao: preco});
-  if(res.success){ alert("✅ Promoção salva!"); carregarPromocoes(); }
-  else { alert("❌ Erro ao salvar promoção"); }
+function addCat(){
+  const v=document.getElementById('newCatInput').value.trim();
+  if(!v) return;
+  if(cats.includes(v)){ alert('Categoria já existe!'); return; }
+  cats.push(v); saveCats(); document.getElementById('newCatInput').value='';
+  renderCatModal(); renderCatBar();
 }
-
-async function removerPromocao(id){
-  if(!confirm("Remover promoção deste produto?")) return;
-  const res = await fazerRequisicao({acao:"salvarPromocao", id, promocao:0});
-  if(res.success){ alert("✅ Promoção removida!"); carregarPromocoes(); }
-  else { alert("❌ Erro ao remover promoção"); }
+function delCat(i){
+  if(!confirm(`Remover "${cats[i]}"?`)) return;
+  cats.splice(i,1); saveCats(); renderCatModal(); renderCatBar();
 }
+function openCatModal(){ renderCatModal(); document.getElementById('catModal').style.display='flex'; }
 
-// ==================== RELATÓRIOS ====================
-async function carregarRelatorios(){
-  mostrarLoading();
-  try {
-    const res = await fetch(API+"?pedidos=1");
-    todosPedidosCache = await res.json();
-    renderizarRelatorio(todosPedidosCache);
-  } catch(e){ console.log(e); }
-  finally { esconderLoading(); }
+// ── PRODUTOS ──
+async function loadProds(){
+  showLoad();
+  try { allProds=await apiGet('produtos=1'); } catch(e){ allProds=[]; }
+  renderCatBar(); renderProds(); hideLoad();
 }
-
-function aplicarFiltros(){
-  let dados = [...todosPedidosCache];
-
-  const inicio  = document.getElementById("filtroDataInicio").value;
-  const fim     = document.getElementById("filtroDataFim").value;
-  const status  = document.getElementById("filtroStatus").value;
-  const busca   = document.getElementById("filtroBusca").value.toLowerCase();
-
-  if(inicio){
-    dados = dados.filter(p=>{
-      const d = parsearData(p.data||p.dataHora||"");
-      return d && d >= new Date(inicio+"T00:00:00");
-    });
-  }
-  if(fim){
-    dados = dados.filter(p=>{
-      const d = parsearData(p.data||p.dataHora||"");
-      return d && d <= new Date(fim+"T23:59:59");
-    });
-  }
-  if(status) dados = dados.filter(p=>p.status===status);
-  if(busca)  dados = dados.filter(p=>
-    (p.cliente||"").toLowerCase().includes(busca)||
-    (p.itens||"").toLowerCase().includes(busca)||
-    (p.telefone||"").includes(busca)||
-    String(p.idPedido).includes(busca)
-  );
-
-  renderizarRelatorio(dados);
+function renderCatBar(){
+  document.getElementById('catBar').innerHTML=['all',...cats].map(c=>`
+    <button class="cat-pill ${catFilter===c?'active':''}" onclick="setCat('${c}')">
+      ${c==='all'?'✦ Todos':c}
+    </button>`).join('');
 }
-
-function limparFiltros(){
-  document.getElementById("filtroDataInicio").value="";
-  document.getElementById("filtroDataFim").value="";
-  document.getElementById("filtroStatus").value="";
-  document.getElementById("filtroBusca").value="";
-  renderizarRelatorio(todosPedidosCache);
-}
-
-function parsearData(str){
-  if(!str) return null;
-  // Tenta ISO ou DD/MM/YYYY HH:MM:SS
-  let d = new Date(str);
-  if(!isNaN(d)) return d;
-  const partes = str.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-  if(partes) return new Date(`${partes[3]}-${partes[2]}-${partes[1]}`);
-  return null;
-}
-
-const corStatus = {
-  "Pendente":           "#ff9800",
-  "Em preparo":         "#00d4ff",
-  "Saiu para entrega":  "#9c27b0",
-  "Entregue":           "#00ff9d",
-  "Cancelado":          "#ff3b5c"
-};
-
-function renderizarRelatorio(dados){
-  dados = [...dados].reverse();
-
-  const total       = dados.length;
-  const faturamento = dados.reduce((s,p)=>s+parseFloat(p.total||0),0);
-  const entregues   = dados.filter(p=>p.status==="Entregue").length;
-  const cancelados  = dados.filter(p=>p.status==="Cancelado").length;
-  const ticket      = total>0 ? faturamento/total : 0;
-
-  document.getElementById("r-total").textContent       = total;
-  document.getElementById("r-faturamento").textContent = "R$ "+faturamento.toFixed(2).replace(".",",");
-  document.getElementById("r-entregues").textContent   = entregues;
-  document.getElementById("r-cancelados").textContent  = cancelados;
-  document.getElementById("r-ticket").textContent      = "R$ "+ticket.toFixed(2).replace(".",",");
-
-  const corpo = document.getElementById("relatorio-body");
-  const vazio = document.getElementById("relatorio-vazio");
-
-  if(!dados.length){
-    corpo.innerHTML="";
-    vazio.style.display="block";
-    return;
-  }
-  vazio.style.display="none";
-
-  corpo.innerHTML = dados.map(p=>{
-    const cor = corStatus[p.status]||"#aaa";
-    return `
-      <tr>
-        <td><strong style="color:var(--accent)">#${p.idPedido}</strong></td>
-        <td style="white-space:nowrap">${p.data||p.dataHora||'—'}</td>
-        <td>${p.cliente}</td>
-        <td>${p.telefone}</td>
-        <td style="max-width:220px;">${p.itens}</td>
-        <td style="white-space:nowrap"><strong style="color:var(--green)">R$ ${parseFloat(p.total||0).toFixed(2).replace(".",",")}</strong></td>
-        <td>${p.pagamento||'—'}</td>
-        <td><span class="badge" style="background:${cor}22;color:${cor};border:1px solid ${cor};">${p.status}</span></td>
-      </tr>`;
-  }).join("");
-}
-
-// ==================== MODAL PRODUTO ====================
-function novoProduto(){
-  produtoEditando=null;
-  document.getElementById("modalTitulo").textContent="Novo Produto";
-  ["prodNome","prodPreco","prodCategoria","prodImagem"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("modalProduto").style.display="flex";
-}
-
-function editarProduto(id){
-  produtoEditando=id;
-  const p = todosProdutosCache.find(x=>String(x.id)===String(id));
-  if(p){
-    document.getElementById("prodNome").value      = p.nome||"";
-    document.getElementById("prodPreco").value     = p.preco||"";
-    document.getElementById("prodCategoria").value = p.categoria||"";
-    document.getElementById("prodImagem").value    = p.imagem||"";
-  }
-  document.getElementById("modalTitulo").textContent="Editar Produto";
-  document.getElementById("modalProduto").style.display="flex";
-}
-
-function fecharModal(){ document.getElementById("modalProduto").style.display="none"; }
-
-async function salvarModal(){
-  const nome      = document.getElementById("prodNome").value.trim();
-  const preco     = document.getElementById("prodPreco").value;
-  const categoria = document.getElementById("prodCategoria").value.trim();
-  const imagem    = document.getElementById("prodImagem").value.trim();
-  if(!nome||!preco){ alert("Nome e Preço são obrigatórios!"); return; }
-
-  const res = await fazerRequisicao({
-    acao:"salvarProduto", id:produtoEditando,
-    nome, preco, categoria,
-    imagem: imagem||"[placehold.co](https://placehold.co/600x400)"
+function setCat(c){ catFilter=c; renderCatBar(); renderProds(); }
+function renderProds(){
+  const q=(document.getElementById('prodSearch')?.value||'').toLowerCase();
+  const list=allProds.filter(p=>{
+    const mc=catFilter==='all'||p.categoria===catFilter;
+    const ms=!q||(p.nome||'').toLowerCase().includes(q)||(p.descricao||'').toLowerCase().includes(q);
+    return mc&&ms;
   });
-  if(res.success){ alert("✅ Produto salvo!"); fecharModal(); carregarProdutos(); }
-  else { alert("❌ Erro ao salvar produto"); }
+  document.getElementById('prodGrid').innerHTML=list.length
+    ?list.map(p=>`
+      <div class="prod-card">
+        <img src="${p.imagem||'https://placehold.co/600x400/1c1c26/555?text=Sem+foto'}" alt=""
+             onerror="this.src='https://placehold.co/600x400/1c1c26/555?text=Sem+foto'">
+        <div class="prod-body">
+          <div class="prod-name">${p.nome}</div>
+          <div class="prod-desc">${p.descricao||'Sem descrição'}</div>
+          <span class="prod-cat">${p.categoria||'Sem categoria'}</span>
+          <div class="prod-price">R$ ${fmtPreco(p.preco)}</div>
+          ${temPromo(p)?`<div class="prod-promo">🏷️ Promo: R$ ${fmtPreco(p.precpromo)} (-${calcDesc(p.preco,p.precpromo)}%)</div>`:''}
+          <div class="prod-actions">
+            <button class="btn btn-out" style="flex:1;" onclick="openEditProd('${p.id}')">✏️ Editar</button>
+            <button class="btn btn-red" onclick="delProd('${p.id}')">🗑</button>
+          </div>
+        </div>
+      </div>`).join('')
+    :'<p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:40px;">Nenhum produto encontrado.</p>';
+}
+function fillCatSelect(sel){
+  document.getElementById('pCategoria').innerHTML='<option value="">Selecione uma categoria...</option>'+
+    cats.map(c=>`<option value="${c}" ${c===sel?'selected':''}>${c}</option>`).join('');
+}
+function openNewProd(){
+  editingId=null;
+  document.getElementById('prodModalTitle').textContent='Novo Produto';
+  ['pNome','pDescricao','pPreco','pImagem'].forEach(i=>document.getElementById(i).value='');
+  fillCatSelect('');
+  document.getElementById('prodModal').style.display='flex';
+}
+function openEditProd(id){
+  editingId=id;
+  const p=allProds.find(x=>String(x.id)===String(id)); if(!p) return;
+  document.getElementById('prodModalTitle').textContent='Editar Produto';
+  document.getElementById('pNome').value     =p.nome||'';
+  document.getElementById('pDescricao').value=p.descricao||'';
+  document.getElementById('pPreco').value    =p.preco||'';
+  document.getElementById('pImagem').value   =p.imagem||'';
+  fillCatSelect(p.categoria||'');
+  document.getElementById('prodModal').style.display='flex';
+}
+function closeProdModal(){ document.getElementById('prodModal').style.display='none'; }
+async function saveProduto(){
+  const nome=document.getElementById('pNome').value.trim();
+  const cat =document.getElementById('pCategoria').value;
+  const preco=document.getElementById('pPreco').value;
+  if(!nome){ alert('Informe o nome.'); return; }
+  if(!preco){ alert('Informe o preço.'); return; }
+  if(!cat){  alert('Selecione uma categoria.'); return; }
+  showLoad();
+  // POST: acao, id (se editar), nome, categoria, descricao, preco, imagem
+  await apiPost({
+    acao:'salvarProduto', id:editingId||null,
+    nome, categoria:cat,
+    descricao:document.getElementById('pDescricao').value.trim(),
+    preco,
+    imagem:document.getElementById('pImagem').value.trim()||'https://placehold.co/600x400/1c1c26/555?text=Sem+foto'
+  });
+  hideLoad(); closeProdModal(); loadProds();
+}
+async function delProd(id){
+  if(!confirm('Excluir este produto?')) return;
+  showLoad(); await apiPost({acao:'excluirProduto',id}); hideLoad(); loadProds();
 }
 
-async function excluirProduto(id){
-  if(!confirm("Excluir este produto?")) return;
-  const res = await fazerRequisicao({acao:"excluirProduto", id});
-  if(res.success){ alert("🗑 Excluído!"); carregarProdutos(); }
-  else { alert("❌ Erro ao excluir"); }
+// ══════════════════════════════════════════════
+//  PROMOÇÕES — col G = "SIM"/"NÃO", col H = precpromo
+//  POST: { acao:"salvarPromocao", id, ativo:bool, precpromo:número }
+// ══════════════════════════════════════════════
+async function loadPromos(){
+  showLoad();
+  try { allProds=await apiGet('produtos=1'); } catch(e){ allProds=[]; }
+  renderPromoGrid();
+  hideLoad();
 }
 
-// ==================== ALTERAR STATUS ====================
-async function alterarStatus(idPedido){
-  const novoStatus = document.getElementById(`status-${idPedido}`).value;
-  const res = await fazerRequisicao({acao:"alterarStatus", idPedido, status:novoStatus});
-  if(res.success){
-    alert("✅ Status atualizado!");
-    carregarPedidos();
-    carregarDashboard();
-  } else { alert("❌ Erro ao atualizar status"); }
+function renderPromoGrid(){
+  document.getElementById('promoGrid').innerHTML = allProds.length
+    ? allProds.map(p=>{
+        const ativo  = temPromo(p);
+        const pp     = ativo ? fmtPreco(p.precpromo) : '';
+        const desc   = ativo ? calcDesc(p.preco,p.precpromo) : 0;
+        return `
+        <div class="promo-card ${ativo?'ativa':''}" id="pc-${p.id}">
+          <img src="${p.imagem||'https://placehold.co/600x400/1c1c26/555?text=Sem+foto'}" alt=""
+               onerror="this.src='https://placehold.co/600x400/1c1c26/555?text=Sem+foto'">
+          <div class="promo-body">
+            <div class="promo-name">${p.nome}</div>
+            <div class="promo-cat">${p.categoria||''}</div>
+            <div class="promo-preco-orig">R$ ${fmtPreco(p.preco)}</div>
+
+            <!-- TOGGLE ATIVO/INATIVO -->
+            <div class="promo-toggle-row">
+              <div>
+                <div class="promo-toggle-lbl">Promoção</div>
+                <div class="promo-toggle-sub">${ativo?'Ativa — visível no cardápio':'Inativa'}</div>
+              </div>
+              <div class="toggle-sw ${ativo?'on':''}" id="sw-${p.id}"
+                   onclick="togglePromo('${p.id}')"></div>
+            </div>
+
+            <!-- CAMPO PREÇO PROMOCIONAL -->
+            <div class="promo-preco-field">
+              <label>Preço Promocional (R$)</label>
+              <div class="promo-preco-input-row">
+                <input type="number" id="pp-${p.id}"
+                       placeholder="Ex: 24.90" step="0.01" min="0.01"
+                       value="${pp}"
+                       ${ativo?'':'disabled'}>
+                <button class="btn btn-yel" onclick="savePromo('${p.id}')"
+                        id="savebtn-${p.id}" ${ativo?'':'disabled'}
+                        style="${ativo?'':'opacity:.4;cursor:not-allowed'}">
+                  💾
+                </button>
+              </div>
+            </div>
+
+            <!-- BADGE STATUS -->
+            ${ativo
+              ? `<div class="promo-badge-ativa">🏷️ R$ ${pp} <span class="desconto-pill">-${desc}%</span></div>`
+              : `<div class="promo-badge-inativa">— Sem promoção</div>`
+            }
+          </div>
+        </div>`;
+      }).join('')
+    : '<p style="color:var(--muted)">Nenhum produto cadastrado.</p>';
 }
 
-// ==================== MAPA ====================
-function abrirMapa(endereco){
-  window.open(
-    `https://www.google.com/maps/search/?api=1&query=${endereco}`,
-    "_blank"
-  );
-}
-// ==================== CONFIGURAÇÕES ====================
-function salvarConfiguracoes(){
-  ["nomeLoja","corSistema","logoLoja","taxaEntrega","tempoEntrega","pedidoMinimo","whatsappLoja","mensagemAuto"]
-    .forEach(id=>localStorage.setItem(id, document.getElementById(id).value));
-  aplicarConfiguracoes();
-  alert("✅ Configurações salvas!");
-}
-
-function carregarConfiguracoes(){
-  ["nomeLoja","corSistema","logoLoja","taxaEntrega","tempoEntrega","pedidoMinimo","whatsappLoja","mensagemAuto"]
-    .forEach(id=>{ document.getElementById(id).value = localStorage.getItem(id)||""; });
-  if(!localStorage.getItem("corSistema")) document.getElementById("corSistema").value="#00d4ff";
+// Toggle liga/desliga promoção visualmente (sem salvar ainda)
+function togglePromo(id){
+  const sw  = document.getElementById('sw-'+id);
+  const inp = document.getElementById('pp-'+id);
+  const btn = document.getElementById('savebtn-'+id);
+  const card= document.getElementById('pc-'+id);
+  const on  = sw.classList.toggle('on');
+  inp.disabled  = !on;
+  btn.disabled  = !on;
+  btn.style.opacity = on?'1':'.4';
+  btn.style.cursor  = on?'pointer':'not-allowed';
+  card.classList.toggle('ativa', on);
+  // Atualiza subtítulo
+  const sub = sw.parentElement.querySelector('.promo-toggle-sub');
+  if(sub) sub.textContent = on?'Ativa — visível no cardápio':'Inativa';
+  // Se desativou, salva imediatamente (remove promoção)
+  if(!on) savePromo(id, false);
 }
 
-function aplicarConfiguracoes(){
-  const nome = localStorage.getItem("nomeLoja");
-  const cor  = localStorage.getItem("corSistema");
-  if(nome) document.querySelector("header h2").innerHTML=`🔧 ${nome}`;
-  if(cor)  document.documentElement.style.setProperty("--accent", cor);
-}
+// Salva promoção
+// ativo=true → salva com precpromo | ativo=false → remove (envia NÃO + precpromo vazio)
+async function savePromo(id, ativoForce){
+  const sw   = document.getElementById('sw-'+id);
+  const ativo= ativoForce !== undefined ? ativoForce : sw.classList.contains('on');
 
-function toggleLoja(){
-  const fechada = localStorage.getItem("lojaFechada");
-  const btn = document.getElementById("btnLoja");
-  if(fechada==="sim"){
-    localStorage.setItem("lojaFechada","nao");
-    btn.innerHTML="🟢 Loja Aberta"; btn.style.background="#00ff9d"; btn.style.color="#000";
+  if(ativo){
+    const v = parseFloat(document.getElementById('pp-'+id).value);
+    if(isNaN(v)||v<=0){ alert('Digite um preço promocional válido.'); return; }
+    showLoad();
+    // POST: { acao:"salvarPromocao", id, ativo:true, precpromo:valor }
+    await apiPost({ acao:'salvarPromocao', id, ativo:true, precpromo:v });
   } else {
-    localStorage.setItem("lojaFechada","sim");
-    btn.innerHTML="🔴 Loja Fechada"; btn.style.background="#ff3b5c"; btn.style.color="#fff";
+    showLoad();
+    // POST: { acao:"salvarPromocao", id, ativo:false, precpromo:"" }
+    await apiPost({ acao:'salvarPromocao', id, ativo:false, precpromo:'' });
   }
+  hideLoad();
+  loadPromos(); // recarrega para refletir estado real da planilha
 }
 
-// Auto login
-if(localStorage.getItem("adminLogado")) mostrarPainel();
-aplicarConfiguracoes();
+// ── RELATÓRIOS ──
+async function loadReports(){
+  showLoad();
+  try { allOrders=await apiGet('pedidos=1'); renderReport(allOrders); } catch(e){}
+  hideLoad();
+}
+function applyFilters(){
+  let d=[...allOrders];
+  const di=document.getElementById('fDI').value;
+  const df=document.getElementById('fDF').value;
+  const st=document.getElementById('fSt').value;
+  const bq=document.getElementById('fBq').value.toLowerCase();
+  if(di) d=d.filter(o=>{ const dt=pd(o.data||''); return dt&&dt>=new Date(di+'T00:00:00'); });
+  if(df) d=d.filter(o=>{ const dt=pd(o.data||''); return dt&&dt<=new Date(df+'T23:59:59'); });
+  if(st) d=d.filter(o=>o.status===st);
+  if(bq) d=d.filter(o=>
+    (o.cliente||'').toLowerCase().includes(bq)||(o.itens||'').toLowerCase().includes(bq)||
+    (o.telefone||'').includes(bq)||(o.referencia||'').toLowerCase().includes(bq)||
+    String(o.idPedido).includes(bq));
+  renderReport(d);
+}
+function clearFilters(){
+  ['fDI','fDF','fBq'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('fSt').value=''; renderReport(allOrders);
+}
+function pd(s){
+  if(!s) return null; let d=new Date(s); if(!isNaN(d)) return d;
+  const m=s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  return m?new Date(`${m[3]}-${m[2]}-${m[1]}`):null;
+}
+const SC={Pendente:'#ff9800','Em preparo':'#00e5ff','Saiu para entrega':'#b388ff',Entregue:'#00e676',Cancelado:'#ff1744'};
+function renderReport(data){
+  data=[...data].reverse();
+  const fat=data.reduce((s,o)=>s+parseFloat(o.total||0),0);
+  document.getElementById('r-total').textContent=data.length;
+  document.getElementById('r-fat').textContent='R$'+fat.toFixed(2).replace('.',',');
+  document.getElementById('r-ent').textContent=data.filter(o=>o.status==='Entregue').length;
+  document.getElementById('r-can').textContent=data.filter(o=>o.status==='Cancelado').length;
+  document.getElementById('r-tick').textContent='R$'+(data.length?fat/data.length:0).toFixed(2).replace('.',',');
+  const body=document.getElementById('relBody');
+  if(!data.length){ body.innerHTML=''; document.getElementById('relEmpty').style.display='block'; return; }
+  document.getElementById('relEmpty').style.display='none';
+  body.innerHTML=data.map(o=>{
+    const c=SC[o.status]||'#aaa';
+    return `<tr>
+      <td><span style="font-family:var(--font-m);color:var(--accent);">#${o.idPedido}</span></td>
+      <td style="white-space:nowrap;color:var(--muted);font-size:11px;">${o.data||'—'}</td>
+      <td style="font-weight:700;">${o.cliente||'—'}</td>
+      <td style="color:var(--accent2);font-family:var(--font-m);font-size:11px;">${o.telefone||'—'}</td>
+      <td style="font-size:11px;color:var(--muted);">${o.endereco||'—'}${o.referencia?'<br><span style="color:var(--purple)">📌 '+o.referencia+'</span>':''}</td>
+      <td style="max-width:180px;font-size:11px;color:var(--muted);">${o.itens||'—'}</td>
+      <td><span style="font-family:var(--font-m);color:var(--green);font-weight:700;">R$ ${fmtPreco(o.total)}</span></td>
+      <td style="font-size:11px;">${o.pagamento||'—'}</td>
+      <td><span class="badge" style="background:${c}18;color:${c};border:1px solid ${c}40;">${o.status||'—'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── CONFIG ──
+const CFG=['cfNome','cfSlogan','cfCor','cfLogo','cfTaxa','cfTempo','cfMin','cfRaio','cfWA','cfEnd','cfMsg','cfHSF','cfHSb','cfHDm'];
+function loadConfig(){
+  CFG.forEach(k=>{ const v=localStorage.getItem('fx_'+k); if(v) document.getElementById(k).value=v; });
+  updateStoreToggle();
+}
+function saveConfig(){
+  CFG.forEach(k=>localStorage.setItem('fx_'+k, document.getElementById(k).value));
+  const cor=document.getElementById('cfCor').value;
+  document.documentElement.style.setProperty('--accent',cor);
+  const nome=document.getElementById('cfNome').value;
+  if(nome){
+    const parts=nome.split(' ');
+    document.querySelector('.logo').innerHTML=`🍕 ${parts[0]}<span>${parts.slice(1).join(' ')||'Delivery'}</span>`;
+  }
+  alert('✅ Configurações salvas!');
+}
+
+// ── STATUS DA LOJA ──
+function toggleStore(){
+  const closed=localStorage.getItem('fx_closed')==='1';
+  localStorage.setItem('fx_closed',closed?'0':'1');
+  updateStoreUI(); updateStoreToggle();
+}
+function updateStoreUI(){
+  const closed=localStorage.getItem('fx_closed')==='1';
+  document.getElementById('hDot').className='store-dot'+(closed?' closed':'');
+  document.getElementById('hStatus').textContent=closed?'Loja Fechada':'Loja Aberta';
+  const b=document.getElementById('store-banner');
+  closed?b.classList.add('show'):b.classList.remove('show');
+}
+function updateStoreToggle(){
+  const closed=localStorage.getItem('fx_closed')==='1';
+  const tog=document.getElementById('storeToggle');
+  const msg=document.getElementById('storeMsg');
+  if(closed){ tog.classList.remove('on'); msg.textContent='🔴 Loja fechada — clientes veem aviso e não conseguem pedir.'; msg.style.color='var(--red)'; msg.style.background='rgba(255,23,68,.07)'; }
+  else { tog.classList.add('on'); msg.textContent='✅ Loja aberta — clientes podem pedir normalmente.'; msg.style.color='var(--green)'; msg.style.background='rgba(0,230,118,.07)'; }
+}
+function askNotif(){ if(Notification.permission==='default') Notification.requestPermission(); }
+
+// ── INIT ──
+if(localStorage.getItem('fx_admin')){
+  document.getElementById('loginOvl').style.display='none';
+  updateStoreUI(); loadDash();
+}
 </script>
 </body>
 </html>
